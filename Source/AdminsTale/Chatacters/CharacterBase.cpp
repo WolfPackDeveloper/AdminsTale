@@ -25,14 +25,14 @@ ACharacterBase::ACharacterBase()
 	SprintSpeed = 600.f;
 	RunSpeed = 420.f;
 	WalkSpeed = 300.f;
-	CrouchSpeed = 120.f;
+	SneakSpeed = 120.f;
 	IsInAir = false;
 	IsRunning = false;
 	IsSprinting = false;
 	IsSneaking = false;
 	
-	ShotDistance = 2000.f;
-	ImpulseForce = 500.f;
+	//ShotDistance = 2000.f;
+	//ImpulseForce = 500.f;
 }
 
 // Called when the game starts or when spawned
@@ -141,7 +141,7 @@ void ACharacterBase::Sneak()
 
 	if (IsSneaking)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = CrouchSpeed;
+		GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 	}
 	else
 	{
@@ -204,36 +204,36 @@ void ACharacterBase::StopShooting()
 
 void ACharacterBase::TraceForward_Implementation()
 {
-	//Для начала из примера LineTrace до цели.
-	FVector ShooterLocation;
-	FRotator ShooterRotation;
-	FHitResult ShotHit;
+	////Для начала из примера LineTrace до цели.
+	//FVector ShooterLocation;
+	//FRotator ShooterRotation;
+	//FHitResult ShotHit;
 
-	//Получаем значения для позиции и направления персонажа.
-	GetController()->GetPlayerViewPoint(ShooterLocation, ShooterRotation);
+	////Получаем значения для позиции и направления персонажа.
+	//GetController()->GetPlayerViewPoint(ShooterLocation, ShooterRotation);
 
-	//Определяем вектор - линия "трассировки". Для проверки находится ли цель в поле зрения и радиусе действия "оружия" персонажа.
-	//Зачем создавать StartShootPoint - для удобства?
-	FVector StartShotPoint = ShooterLocation;
-	FVector EndShotPoint = StartShotPoint + (ShooterRotation.Vector() * ShotDistance);
-	FVector HitSplash = FVector(5, 5, 5);
+	////Определяем вектор - линия "трассировки". Для проверки находится ли цель в поле зрения и радиусе действия "оружия" персонажа.
+	////Зачем создавать StartShootPoint - для удобства?
+	//FVector StartShotPoint = ShooterLocation;
+	//FVector EndShotPoint = StartShotPoint + (ShooterRotation.Vector() * ShotDistance);
+	//FVector HitSplash = FVector(5, 5, 5);
 
-	//Проверям "попадание" - пересечение (collision) "линией атаки" меша (нужной категории) объекта.
-	FCollisionQueryParams TraceParams;
-	bool bHit = GetWorld()->LineTraceSingleByChannel(
-		ShotHit,
-		StartShotPoint,
-		EndShotPoint,
-		ECC_Visibility,
-		TraceParams
-	);
-	//Визуализируем результаты.
-	DrawDebugLine(GetWorld(), StartShotPoint, EndShotPoint, FColor::Orange, false, 2.f, 0, 2.f);
+	////Проверям "попадание" - пересечение (collision) "линией атаки" меша (нужной категории) объекта.
+	//FCollisionQueryParams TraceParams;
+	//bool bHit = GetWorld()->LineTraceSingleByChannel(
+	//	ShotHit,
+	//	StartShotPoint,
+	//	EndShotPoint,
+	//	ECC_Visibility,
+	//	TraceParams
+	//);
+	////Визуализируем результаты.
+	//DrawDebugLine(GetWorld(), StartShotPoint, EndShotPoint, FColor::Orange, false, 2.f, 0, 2.f);
 
-	if (bHit)
-	{
-		DrawDebugBox(GetWorld(), ShotHit.ImpactPoint, HitSplash, FColor::Emerald, false, 2.f);
-	}
+	//if (bHit)
+	//{
+	//	DrawDebugBox(GetWorld(), ShotHit.ImpactPoint, HitSplash, FColor::Emerald, false, 2.f);
+	//}
 }
 
 // Called every frame

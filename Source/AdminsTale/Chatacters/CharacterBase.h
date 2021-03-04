@@ -25,55 +25,77 @@ protected:
 	virtual void BeginPlay() override;
 
 	//PROPERTIES
+
 	//Charactericstics
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	UHealthComponent* Health = nullptr;
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Characteristics")
-	//float Mana = 100.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	UManaComponent* Mana = nullptr;
 
 	//Movement
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float BaseTurnRate = 70.f;
+	
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SprintSpeed = 600.f;
+	
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float RunSpeed = 420.f;
+	
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float WalkSpeed = 300.f;
+	
 	UPROPERTY(EditAnywhere, Category = "Movement")
-	float CrouchSpeed = 120.f;
+	float SneakSpeed = 120.f;
+	
 	//State
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsInAir = false;
+	
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsRunning = false;
+	
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsSprinting = false;
+	
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsSneaking = false;
+	
 	//Attack
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float ShotDistance = 2000.f;
-	UPROPERTY(EditAnywhere, Category = "Attack")
-	float ImpulseForce = 10.f;
+	//UPROPERTY(EditAnywhere, Category = "Attack")
+	//float ShotDistance = 2000.f;
+	//UPROPERTY(EditAnywhere, Category = "Attack")
+	//float ImpulseForce = 10.f;
 
 	//FUNCTIONS
 	UFUNCTION(BlueprintNativeEvent)
 	void TraceForward();
+	
 	void TraceForward_Implementation();
+	
 	//Movement
 	void MoveForvard(float AxisValue);
+	
 	void MoveRight(float AxisValue);
+	
 	void LookUpRate(float AxisValue);
+	
 	void TurnRate(float AxisValue);
+	
 	virtual void Jump() override;
+	
 	void Run();
+	
 	void Sprint();
+	
 	void Sneak();
+	
 	//Attacking
 	void Attack();
+	
 	void Shoot();
+	
 	void StopShooting();
 
 

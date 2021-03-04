@@ -4,13 +4,15 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "AbilitySystemInterface.h"
 #include "CharacterBase.generated.h"
 
 class UHealthComponent;
 class UManaComponent;
+class UAbilitySystemComponent;
 
 UCLASS()
-class ADMINSTALE_API ACharacterBase : public ACharacter
+class ADMINSTALE_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
 {
 	GENERATED_BODY()
 
@@ -19,12 +21,16 @@ private:
 public:
 	// Sets default values for this character's properties
 	ACharacterBase();
+	//Переопределение метода интерфейса
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
 	//PROPERTIES
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+	UAbilitySystemComponent* AbilitySystemComponent = nullptr;
 
 	//Charactericstics
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")

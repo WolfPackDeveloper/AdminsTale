@@ -16,6 +16,9 @@ ACharacterPlayer::ACharacterPlayer()
 	PrimaryActorTick.bCanEverTick = true;
 
 	//Default values
+	
+	//AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
+	
 	FVector saLocation;
 	saLocation.Set(0.f, 20.f, 70.f);
 	float saArmLength = 350.f;
@@ -31,6 +34,11 @@ ACharacterPlayer::ACharacterPlayer()
 }
 
 
+
+//UAbilitySystemComponent* ACharacterPlayer::GetAbilitySystemComponent() const
+//{
+//	return AbilitySystemComponent;
+//}
 
 // Called when the game starts or when spawned
 void ACharacterPlayer::BeginPlay()

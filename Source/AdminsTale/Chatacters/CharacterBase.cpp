@@ -5,6 +5,7 @@
 #include "AdminsTale/Chatacters/Components/HealthComponent.h"
 #include "AdminsTale/Chatacters/Components/ManaComponent.h"
 
+#include "AbilitySystemComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/StaticMeshComponent.h"
 #include "DrawDebugHelpers.h"
@@ -18,6 +19,8 @@ ACharacterBase::ACharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
+	
 	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
 	Mana = CreateDefaultSubobject<UManaComponent>(TEXT("Mana"));
 	
@@ -33,6 +36,11 @@ ACharacterBase::ACharacterBase()
 	
 	//ShotDistance = 2000.f;
 	//ImpulseForce = 500.f;
+}
+
+UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 // Called when the game starts or when spawned

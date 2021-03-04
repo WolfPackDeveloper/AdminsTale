@@ -18,6 +18,9 @@ public:
 
 	ACharacterPlayer();
 	
+	//Переопределение метода интерфейса
+	//virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* SpringArm;
 	UPROPERTY(EditAnywhere, Category = "Camera")
@@ -28,6 +31,9 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;
 
 public:
 	

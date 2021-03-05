@@ -38,11 +38,6 @@ ACharacterBase::ACharacterBase()
 	//ImpulseForce = 500.f;
 }
 
-UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
-
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
 {
@@ -242,6 +237,11 @@ void ACharacterBase::TraceForward_Implementation()
 	//{
 	//	DrawDebugBox(GetWorld(), ShotHit.ImpactPoint, HitSplash, FColor::Emerald, false, 2.f);
 	//}
+}
+
+UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
+{
+	return AbilitySystemComponent;
 }
 
 // Called every frame

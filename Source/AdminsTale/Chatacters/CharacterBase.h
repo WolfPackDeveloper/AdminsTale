@@ -21,8 +21,6 @@ private:
 public:
 	// Sets default values for this character's properties
 	ACharacterBase();
-	//Переопределение метода интерфейса
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 protected:
 	// Called when the game starts or when spawned
@@ -106,7 +104,8 @@ protected:
 
 
 public:	
-	
+	//Переопределение метода интерфейса
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input

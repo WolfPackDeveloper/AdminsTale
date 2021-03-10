@@ -2,6 +2,7 @@
 
 
 #include "AdminPlayerController.h"
+#include "AdminsTale/Chatacters/CharacterBase.h"
 #include "AdminsTale/Chatacters/CharacterPlayer.h"
 
 #include "Components/InputComponent.h"
@@ -23,10 +24,7 @@ void AAdminPlayerController::SetupInputComponent()
 
 	if (InputComponent)
 	{
-
-	}
-
-	//InputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
+		//InputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
 	//InputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
 
 	//InputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
@@ -42,4 +40,5 @@ void AAdminPlayerController::SetupInputComponent()
 	//InputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &ACharacterBase::Attack);
 	//InputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &ACharacterBase::Shoot);
 	//InputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Released, this, &ACharacterBase::StopShooting);
+	}
 }

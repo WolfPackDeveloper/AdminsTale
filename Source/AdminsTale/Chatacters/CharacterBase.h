@@ -73,10 +73,6 @@ protected:
 	//float ImpulseForce = 10.f;
 
 	//FUNCTIONS
-	UFUNCTION(BlueprintNativeEvent)
-	void TraceForward();
-	
-	void TraceForward_Implementation();
 	
 	//Movement
 	void MoveForvard(float AxisValue);
@@ -96,12 +92,11 @@ protected:
 	void Sneak();
 	
 	//Attacking
-	void Attack();
+	void AttackFast();
 	
-	void Shoot();
-	
-	void StopShooting();
+	void AttackStrong();
 
+	void Action();
 
 public:	
 	//Переопределение метода интерфейса

@@ -152,91 +152,19 @@ void ACharacterBase::Sneak()
 	}
 }
 
-void ACharacterBase::Attack()
+void ACharacterBase::AttackFast()
 {
 
 }
 
-void ACharacterBase::Shoot()
+void ACharacterBase::AttackStrong()
 {
-	//Разобраться с физикой и коллизией персонажей.
 	
-	////Пока что трассировка - своя, или переопределённая в BP.
-	////TraceForward();
-	////Для начала из примера LineTrace до цели.
-	//FVector ShooterLocation;
-	//FRotator ShooterRotation;
-	//FHitResult ShotHit;
-
-	////Получаем значения для позиции и направления персонажа.
-	//GetController()->GetPlayerViewPoint(ShooterLocation, ShooterRotation);
-
-	////Определяем вектор - линия "трассировки". Для проверки находится ли цель в поле зрения и радиусе действия "оружия" персонажа.
-	////Зачем создавать StartShootPoint - для удобства?
-	//FVector StartShotPoint = ShooterLocation;
-	//FVector EndShotPoint = StartShotPoint + (ShooterRotation.Vector() * ShotDistance);
-	//
-	////Проверям "попадание" - пересечение (collision) "линией атаки" меша (нужной категории) объекта.
-	//FCollisionQueryParams TraceParams;
-	//bool bHit = GetWorld()->LineTraceSingleByChannel(
-	//	ShotHit,
-	//	StartShotPoint,
-	//	EndShotPoint,
-	//	ECC_Visibility,
-	//	TraceParams
-	//);
-
-	//if (bHit & ShotHit.GetActor()->IsRootComponentMovable())
-	//{
-	//	//Когда попадает на моба (скелетный мещ, или что там ещё может быть...) вылетает с ошибкой критической!
-	//	
-	//	UMeshComponent* MeshComponent = Cast<UMeshComponent>(ShotHit.GetActor()->GetRootComponent());
-	//	if (MeshComponent)
-	//	{
-	//		FVector ActorForward = GetActorForwardVector();
-	//		MeshComponent->AddImpulse(ActorForward * ImpulseForce * MeshComponent->GetMass());
-	//	}
-	//}
-
 }
 
-void ACharacterBase::StopShooting()
+void ACharacterBase::Action()
 {
 
-}
-
-void ACharacterBase::TraceForward_Implementation()
-{
-	////Для начала из примера LineTrace до цели.
-	//FVector ShooterLocation;
-	//FRotator ShooterRotation;
-	//FHitResult ShotHit;
-
-	////Получаем значения для позиции и направления персонажа.
-	//GetController()->GetPlayerViewPoint(ShooterLocation, ShooterRotation);
-
-	////Определяем вектор - линия "трассировки". Для проверки находится ли цель в поле зрения и радиусе действия "оружия" персонажа.
-	////Зачем создавать StartShootPoint - для удобства?
-	//FVector StartShotPoint = ShooterLocation;
-	//FVector EndShotPoint = StartShotPoint + (ShooterRotation.Vector() * ShotDistance);
-	//FVector HitSplash = FVector(5, 5, 5);
-
-	////Проверям "попадание" - пересечение (collision) "линией атаки" меша (нужной категории) объекта.
-	//FCollisionQueryParams TraceParams;
-	//bool bHit = GetWorld()->LineTraceSingleByChannel(
-	//	ShotHit,
-	//	StartShotPoint,
-	//	EndShotPoint,
-	//	ECC_Visibility,
-	//	TraceParams
-	//);
-	////Визуализируем результаты.
-	//DrawDebugLine(GetWorld(), StartShotPoint, EndShotPoint, FColor::Orange, false, 2.f, 0, 2.f);
-
-	//if (bHit)
-	//{
-	//	DrawDebugBox(GetWorld(), ShotHit.ImpactPoint, HitSplash, FColor::Emerald, false, 2.f);
-	//}
 }
 
 UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
@@ -269,7 +197,8 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
-	PlayerInputComponent->BindAction(TEXT("Attack"), EInputEvent::IE_Pressed, this, &ACharacterBase::Attack);
-	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Pressed, this, &ACharacterBase::Shoot);
-	PlayerInputComponent->BindAction(TEXT("Shoot"), EInputEvent::IE_Released, this, &ACharacterBase::StopShooting);
+	PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
+	PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
+	PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
+
 }

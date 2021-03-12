@@ -172,6 +172,26 @@ UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
+bool ACharacterBase::GetIsInAir()
+{
+	return IsInAir;
+}
+
+bool ACharacterBase::GetIsRunning()
+{
+	return IsRunning;
+}
+
+bool ACharacterBase::GetIsSprinting()
+{
+	return IsSprinting;
+}
+
+bool ACharacterBase::GetIsSneaking()
+{
+	return IsSneaking;
+}
+
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)
 {

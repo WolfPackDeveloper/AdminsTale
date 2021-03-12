@@ -66,12 +66,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsSneaking = false;
 	
-	//Attack
-	//UPROPERTY(EditAnywhere, Category = "Attack")
-	//float ShotDistance = 2000.f;
-	//UPROPERTY(EditAnywhere, Category = "Attack")
-	//float ImpulseForce = 10.f;
-
 	//FUNCTIONS
 	
 	//Movement
@@ -101,6 +95,20 @@ protected:
 public:	
 	//Переопределение метода интерфейса
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	UFUNCTION(BlueprintPure)
+	bool GetIsInAir();
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsRunning();
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsSprinting();
+
+	UFUNCTION(BlueprintPure)
+	bool GetIsSneaking();
+
+	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input

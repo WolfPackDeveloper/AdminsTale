@@ -29,7 +29,6 @@ ACharacterBase::ACharacterBase()
 	RunSpeed = 420.f;
 	WalkSpeed = 300.f;
 	SneakSpeed = 120.f;
-	IsInAir = false;
 	IsRunning = false;
 	IsSprinting = false;
 	IsSneaking = false;
@@ -170,11 +169,6 @@ void ACharacterBase::Action()
 UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 {
 	return AbilitySystemComponent;
-}
-
-bool ACharacterBase::GetIsInAir()
-{
-	return IsInAir;
 }
 
 bool ACharacterBase::GetIsRunning()

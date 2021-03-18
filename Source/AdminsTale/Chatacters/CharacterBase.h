@@ -54,9 +54,7 @@ protected:
 	float SneakSpeed = 120.f;
 	
 	//State
-	UPROPERTY(EditAnywhere, Category = "States")
-	bool IsInAir = false;
-	
+		
 	UPROPERTY(EditAnywhere, Category = "States")
 	bool IsRunning = false;
 	
@@ -97,9 +95,6 @@ public:
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
 	UFUNCTION(BlueprintPure)
-	bool GetIsInAir();
-
-	UFUNCTION(BlueprintPure)
 	bool GetIsRunning();
 
 	UFUNCTION(BlueprintPure)
@@ -107,8 +102,7 @@ public:
 
 	UFUNCTION(BlueprintPure)
 	bool GetIsSneaking();
-
-	
+		
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input

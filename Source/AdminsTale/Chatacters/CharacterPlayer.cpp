@@ -7,6 +7,7 @@
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
 #include "Engine/World.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -31,6 +32,11 @@ ACharacterPlayer::ACharacterPlayer()
 
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+
+	//Заморочки с приседом...
+	GetMovementComponent()->NavAgentProps.bCanCrouch = true;
+
+	
 }
 
 
@@ -50,6 +56,8 @@ void ACharacterPlayer::BeginPlay()
 	//{
 	//	PlayerHUD->AddToViewport();
 	//}
+
+	
 }
 
 // Called every frame

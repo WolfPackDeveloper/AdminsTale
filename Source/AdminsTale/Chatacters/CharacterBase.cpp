@@ -120,7 +120,8 @@ void ACharacterBase::Sprint()
 	//UE_LOG(LogTemp, Warning, TEXT("Sprint Mode is %s"), IsRunning ? TEXT("true") : TEXT("false"));
 	//Но только не крадёмся
 	IsSneaking = false;
-	IsRunning = false;
+	//Когда мы спринтуем, мы всё ещё бежим, логично же.))
+	//IsRunning = false;
 
 	if (IsSprinting)
 	{

@@ -152,6 +152,30 @@ void ACharacterBase::Sneak()
 	}
 }
 
+void ACharacterBase::EnableBattleMode_Implementation()
+{
+
+}
+
+void ACharacterBase::DisableBattleMode_Implementation()
+{
+
+}
+
+void ACharacterBase::SetBattleMode_Implementation()
+{
+	IsBattleModeOn = !(IsBattleModeOn);
+
+	if (IsBattleModeOn)
+	{
+		DisableBattleMode();
+	}
+	else
+	{
+		EnableBattleMode();
+	}
+}
+
 void ACharacterBase::AttackFast()
 {
 
@@ -212,6 +236,9 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
+	
+	PlayerInputComponent->BindAction(TEXT ("BattleMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetBattleMode);
+	
 	PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
 	PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
 	PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);

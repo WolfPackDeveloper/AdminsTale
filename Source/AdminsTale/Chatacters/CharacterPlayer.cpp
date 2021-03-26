@@ -33,10 +33,13 @@ ACharacterPlayer::ACharacterPlayer()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
-	//Заморочки с приседом...
-	GetMovementComponent()->NavAgentProps.bCanCrouch = true;
+	//Такие дела - ходим только "вперёд".
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 
-	
+	//Заморочки с приседом...
+	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
+
 }
 
 
@@ -51,6 +54,10 @@ void ACharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 	
+	//По умолчанию - бежим. А то медленно он ходит. Бесит.
+	IsRunning = true;
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+
 	//PlayerHUD = CreateWidget(this, PlayerHUDClass);
 	//if (PlayerHUD != nullptr)
 	//{

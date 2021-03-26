@@ -55,17 +55,26 @@ protected:
 	
 	//State
 		
-	UPROPERTY(EditAnywhere, Category = "States")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
 	bool IsRunning = false;
 	
-	UPROPERTY(EditAnywhere, Category = "States")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
 	bool IsSprinting = false;
 	
-	UPROPERTY(EditAnywhere, Category = "States")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
 	bool IsSneaking = false;
+
+	//Battle
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	bool IsInBattle = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	bool IsBattleModeOn = false;
 	
-	//FUNCTIONS
-	
+	// ==========
+	// FUNCTIONS
+	// ==========
+
 	//Movement
 	void MoveForvard(float AxisValue);
 	
@@ -82,7 +91,23 @@ protected:
 	void Sprint();
 	
 	void Sneak();
+
+	//Battle
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void EnableBattleMode();
+
+	void EnableBattleMode_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void DisableBattleMode();
+
+	void DisableBattleMode_Implementation();
 	
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void SetBattleMode();
+	
+	void SetBattleMode_Implementation();
+
 	//Attacking
 	void AttackFast();
 	

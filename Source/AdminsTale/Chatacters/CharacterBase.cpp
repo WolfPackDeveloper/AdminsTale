@@ -25,10 +25,10 @@ ACharacterBase::ACharacterBase()
 	Mana = CreateDefaultSubobject<UManaComponent>(TEXT("Mana"));
 	
 	BaseTurnRate = 70.f;
-	SprintSpeed = 600.f;
-	RunSpeed = 420.f;
-	WalkSpeed = 300.f;
-	SneakSpeed = 120.f;
+	SprintSpeed = 500.f;
+	RunSpeed = 350.f;
+	WalkSpeed = 150.f;
+	SneakSpeed = 150.f;
 	IsRunning = false;
 	IsSprinting = false;
 	IsSneaking = false;
@@ -176,14 +176,26 @@ void ACharacterBase::SetBattleMode_Implementation()
 	}
 }
 
-void ACharacterBase::AttackFast()
+void ACharacterBase::AttackFast_Implementation()
 {
-
+	if (!IsBattleModeOn)
+	{
+		IsBattleModeOn = true;
+		
+		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
+		//EnableBattleMode();
+	}
 }
 
-void ACharacterBase::AttackStrong()
+void ACharacterBase::AttackStrong_Implementation()
 {
-	
+	if (!IsBattleModeOn)
+	{
+		IsBattleModeOn = true;
+		
+		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
+		//EnableBattleMode();
+	}
 }
 
 void ACharacterBase::Action()

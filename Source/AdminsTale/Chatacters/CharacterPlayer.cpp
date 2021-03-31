@@ -20,9 +20,18 @@ ACharacterPlayer::ACharacterPlayer()
 	
 	//AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
 	
+	BaseTurnRate = 70.f;
+	SprintSpeed = 500.f;
+	RunSpeed = 350.f;
+	WalkSpeed = 150.f;
+	SneakSpeed = 150.f;
+	IsRunning = false;
+	IsSprinting = false;
+	IsSneaking = false;
+
 	FVector saLocation;
 	saLocation.Set(0.f, 20.f, 70.f);
-	float saArmLength = 350.f;
+	float saArmLength = 450.f;
 
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);

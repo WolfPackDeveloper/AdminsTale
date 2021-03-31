@@ -93,6 +93,7 @@ protected:
 	void Sneak();
 
 	//Battle
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void EnableBattleMode();
 
@@ -109,9 +110,16 @@ protected:
 	void SetBattleMode_Implementation();
 
 	//Attacking
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackFast();
-	
+
+	void AttackFast_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackStrong();
+
+	void AttackStrong_Implementation();
 
 	void Action();
 

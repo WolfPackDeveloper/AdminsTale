@@ -8,6 +8,7 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class UAnimMontage;
 
 UCLASS()
 class ADMINSTALE_API ACharacterPlayer : public ACharacterBase
@@ -31,6 +32,9 @@ private:
 protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
+
+	UFUNCTION(BlueprintCallable)
+	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
 	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;

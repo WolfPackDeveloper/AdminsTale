@@ -76,6 +76,15 @@ void ACharacterPlayer::BeginPlay()
 	
 }
 
+void ACharacterPlayer::Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)
+{
+	if (!(GetCharacterMovement()->IsFalling()) && (GetCharacterMovement()->GetLastInputVector() != FVector(0.f,0.f,0.f)))
+	{
+		//FVector LastInputVector = GetCharacterMovement()->GetLastInputVector();
+		PlayAnimMontage(RollAnimMontage, RollPlayRate, RollSectionName);
+	}
+}
+
 // Called every frame
 void ACharacterPlayer::Tick(float DeltaTime)
 {
@@ -87,4 +96,7 @@ void ACharacterPlayer::Tick(float DeltaTime)
 void ACharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);	
+
+	//Походу привязываемый делегат не должен иметь параметров...
+	//PlayerInputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::CanRoll);
 }

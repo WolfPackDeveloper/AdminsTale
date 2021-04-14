@@ -3,7 +3,6 @@
 
 #include "CharacterBase.h"
 #include "AdminsTale/Chatacters/Components/HealthComponent.h"
-#include "AdminsTale/Chatacters/Components/ManaComponent.h"
 
 #include "AbilitySystemComponent.h"
 #include "Components/InputComponent.h"
@@ -19,10 +18,10 @@ ACharacterBase::ACharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	// GAS отложен до лучших времён...
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
 	
 	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
-	Mana = CreateDefaultSubobject<UManaComponent>(TEXT("Mana"));
 	
 	BaseTurnRate = 70.f;
 	SprintSpeed = 500.f;

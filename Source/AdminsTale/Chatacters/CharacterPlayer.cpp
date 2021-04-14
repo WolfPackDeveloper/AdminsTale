@@ -45,7 +45,7 @@ ACharacterPlayer::ACharacterPlayer()
 	Camera->SetupAttachment(SpringArm);
 
 	//—тавим "крепление" оружи€ в нормальное положение
-	//FVector ComponentLocation = FVector(11.f, 3.f, 20.f);
+	//FVector ComponentLocation = FVector(11.f, 3.f, 19.f);
 	//FRotator ComponentRotation = FRotator(15.f, 180.f, 25.f);
 
 	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));

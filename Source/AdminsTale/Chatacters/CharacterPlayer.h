@@ -8,7 +8,11 @@
 
 class USpringArmComponent;
 class UCameraComponent;
+class USceneComponent;
+//class USceletalMeshComponent;
 class UAnimMontage;
+
+class AWeapon;
 
 UCLASS()
 class ADMINSTALE_API ACharacterPlayer : public ACharacterBase
@@ -29,7 +33,20 @@ public:
 
 private:
 
+	UPROPERTY(EditDefaultsOnly)
+	TSubclassOf<AWeapon> WeaponClass;
+
 protected:
+		
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USceneComponent* MeleeWeaponUnarmed = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USceneComponent* MeleeWeaponArmed = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	AWeapon* MeleeWeapon;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

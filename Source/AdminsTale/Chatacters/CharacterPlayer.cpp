@@ -2,10 +2,12 @@
 
 
 #include "CharacterPlayer.h"
+#include "AdminsTale/Actors/Weapon.h"
 
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -42,6 +44,21 @@ ACharacterPlayer::ACharacterPlayer()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
+	//Ставим "крепление" оружия в нормальное положение
+	//FVector ComponentLocation = FVector(11.f, 3.f, 20.f);
+	//FRotator ComponentRotation = FRotator(15.f, 180.f, 25.f);
+
+	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
+	MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));
+	//MeleeWeaponUnarmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
+
+	//ComponentLocation = FVector(35.f, -19.f, 3.f);
+	//ComponentRotation = FRotator(90.f, -15.f, 180.f);
+
+	MeleeWeaponArmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponArmed"));
+	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
+	//MeleeWeaponArmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
+	
 	//Такие дела - ходим только "вперёд".
 	bUseControllerRotationYaw = false;
 	GetCharacterMovement()->bOrientRotationToMovement = true;
@@ -50,8 +67,6 @@ ACharacterPlayer::ACharacterPlayer()
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
 
 }
-
-
 
 //UAbilitySystemComponent* ACharacterPlayer::GetAbilitySystemComponent() const
 //{
@@ -67,13 +82,16 @@ void ACharacterPlayer::BeginPlay()
 	IsRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 
+	MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+	//Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
+	MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	MeleeWeapon->SetOwner(this);
+		
 	//PlayerHUD = CreateWidget(this, PlayerHUDClass);
 	//if (PlayerHUD != nullptr)
 	//{
 	//	PlayerHUD->AddToViewport();
 	//}
-
-	
 }
 
 void ACharacterPlayer::Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)

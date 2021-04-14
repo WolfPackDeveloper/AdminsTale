@@ -8,7 +8,6 @@
 #include "CharacterBase.generated.h"
 
 class UHealthComponent;
-class UManaComponent;
 class UAbilitySystemComponent;
 
 UCLASS()
@@ -33,10 +32,7 @@ protected:
 	//Charactericstics
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	UHealthComponent* Health = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
-	UManaComponent* Mana = nullptr;
-
+	
 	//Movement
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float BaseTurnRate = 70.f;

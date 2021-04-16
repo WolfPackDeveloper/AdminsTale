@@ -6,7 +6,7 @@
 
 #include "AbilitySystemComponent.h"
 #include "Components/InputComponent.h"
-#include "Components/StaticMeshComponent.h"
+#include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -52,7 +52,11 @@ void ACharacterBase::MoveForvard(float AxisValue)
 	
 	//¬ариант є2 - внезапно нашЄл на ютубе, его предлагает бес€щий организованный бормотун.
 	//ќн по идее толковые вещи обычно бормочет... Ќо наху€ такие сложности???!!!
-	if ((IsValid(Controller)) && (AxisValue != 0.0f))
+	
+	//ќстанавливаем персонажа, во врем€ действий (атака, кувырок и вс€кое такое)
+	bool IsInAction = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
+	
+	if ((IsValid(Controller)) && (AxisValue != 0.0f) && !IsInAction)
 	{
 		//ѕочему мне пришлось контроллер прописывать в инклуды, а в примере и так хавает???
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -65,9 +69,10 @@ void ACharacterBase::MoveForvard(float AxisValue)
 
 void ACharacterBase::MoveRight(float AxisValue)
 {
-	//AddMovementInput(GetActorRightVector() * AxisValue);
-	
-	if ((IsValid(Controller)) && (AxisValue != 0.0f))
+	//ќстанавливаем персонажа, во врем€ действий (атака, кувырок и вс€кое такое)
+	bool IsInAction = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
+
+	if ((IsValid(Controller)) && (AxisValue != 0.0f) && !IsInAction)
 	{
 		//ѕочему мне пришлось контроллер прописывать в инклуды, а в примере и так хавает???
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -90,7 +95,10 @@ void ACharacterBase::TurnRate(float AxisValue)
 
 void ACharacterBase::Jump()
 {
-	Super::Jump();
+	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+	{
+		Super::Jump();
+	}
 }
 
 void ACharacterBase::Run()
@@ -207,20 +215,20 @@ UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-bool ACharacterBase::GetIsRunning()
-{
-	return IsRunning;
-}
-
-bool ACharacterBase::GetIsSprinting()
-{
-	return IsSprinting;
-}
-
-bool ACharacterBase::GetIsSneaking()
-{
-	return IsSneaking;
-}
+//bool ACharacterBase::GetIsRunning()
+//{
+//	return IsRunning;
+//}
+//
+//bool ACharacterBase::GetIsSprinting()
+//{
+//	return IsSprinting;
+//}
+//
+//bool ACharacterBase::GetIsSneaking()
+//{
+//	return IsSneaking;
+//}
 
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)

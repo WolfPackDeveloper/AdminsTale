@@ -123,14 +123,14 @@ public:
 	//Переопределение метода интерфейса
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
-	UFUNCTION(BlueprintPure)
-	bool GetIsRunning();
+	//UFUNCTION(BlueprintPure)
+	//bool GetIsRunning();
 
-	UFUNCTION(BlueprintPure)
-	bool GetIsSprinting();
+	//UFUNCTION(BlueprintPure)
+	//bool GetIsSprinting();
 
-	UFUNCTION(BlueprintPure)
-	bool GetIsSneaking();
+	//UFUNCTION(BlueprintPure)
+	//bool GetIsSneaking();
 		
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

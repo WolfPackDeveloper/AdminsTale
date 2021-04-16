@@ -4,6 +4,7 @@
 #include "CharacterPlayer.h"
 #include "AdminsTale/Actors/Weapon.h"
 
+#include "Animation/AnimInstance.h"
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
@@ -73,6 +74,14 @@ ACharacterPlayer::ACharacterPlayer()
 //	return AbilitySystemComponent;
 //}
 
+//void ACharacterPlayer::Jump()
+//{
+//	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+//	{
+//		Super::Jump();
+//	}
+//}
+
 // Called when the game starts or when spawned
 void ACharacterPlayer::BeginPlay()
 {
@@ -98,7 +107,18 @@ void ACharacterPlayer::Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, F
 {
 	if (!(GetCharacterMovement()->IsFalling()) && (GetCharacterMovement()->GetLastInputVector() != FVector(0.f,0.f,0.f)))
 	{
-		//FVector LastInputVector = GetCharacterMovement()->GetLastInputVector();
+		if (GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
+		{
+			UAnimMontage* CurrentMontage = GetMesh()->GetAnimInstance()->GetCurrentActiveMontage();
+			
+			if (CurrentMontage == RollAnimMontage)
+			{
+				return;
+			}
+
+			GetMesh()->GetAnimInstance()->Montage_Stop(0.f, CurrentMontage);
+		}
+
 		PlayAnimMontage(RollAnimMontage, RollPlayRate, RollSectionName);
 	}
 }
@@ -117,4 +137,6 @@ void ACharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	//Походу привязываемый делегат не должен иметь параметров...
 	//PlayerInputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::CanRoll);
+	//PlayerInputComponent->BindAction (TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::Jump);
+	
 }

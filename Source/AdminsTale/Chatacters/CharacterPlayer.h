@@ -36,6 +36,8 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AWeapon> WeaponClass;
 
+	//virtual void Jump() override;
+
 protected:
 		
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")

@@ -28,12 +28,9 @@ ACharacterBase::ACharacterBase()
 	RunSpeed = 350.f;
 	WalkSpeed = 150.f;
 	SneakSpeed = 150.f;
-	IsRunning = false;
-	IsSprinting = false;
-	IsSneaking = false;
-	
-	//ShotDistance = 2000.f;
-	//ImpulseForce = 500.f;
+	bRunning = false;
+	bSprinting = false;
+	bSneaking = false;
 }
 
 // Called when the game starts or when spawned
@@ -47,11 +44,11 @@ void ACharacterBase::BeginPlay()
 
 void ACharacterBase::MoveForvard(float AxisValue)
 {
-	//Вариант №1 - его предлагает пиздливый убывчивый неорганизованный пёс.
+	//Вариант №1 - его предлагает пиздливый улыбчивый неорганизованный пёс.
 	//AddMovementInput(GetActorForwardVector() * AxisValue);
 	
 	//Вариант №2 - внезапно нашёл на ютубе, его предлагает бесящий организованный бормотун.
-	//Он по идее толковые вещи обычно бормочет... Но нахуя такие сложности???!!!
+	//Он, по идее, толковые вещи обычно бормочет... Но нахуя такие сложности???!!!
 	
 	//Останавливаем персонажа, во время действий (атака, кувырок и всякое такое)
 	bool IsInAction = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
@@ -104,13 +101,13 @@ void ACharacterBase::Jump()
 void ACharacterBase::Run()
 {
 	//Бежим, или идём
-	IsRunning = !(IsRunning);
+	bRunning = !(bRunning);
 	//UE_LOG(LogTemp, Warning, TEXT("Run Mode is %s"), IsRunning ? TEXT("true") : TEXT("false"));
 	//Но только не крадёмся
-	IsSneaking = false;
-	IsSprinting = false;
+	bSneaking = false;
+	bSprinting = false;
 
-	if (IsRunning)
+	if (bRunning)
 	{
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
@@ -122,72 +119,96 @@ void ACharacterBase::Run()
 
 void ACharacterBase::Sprint()
 {
-	//Спринтуем, или бежим
-	IsSprinting = !(IsSprinting);
-	//UE_LOG(LogTemp, Warning, TEXT("Sprint Mode is %s"), IsRunning ? TEXT("true") : TEXT("false"));
-	//Но только не крадёмся
-	IsSneaking = false;
-	//Когда мы спринтуем, мы всё ещё бежим, логично же.))
-	//IsRunning = false;
-
-	if (IsSprinting)
+	if (!bCombatMode)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		//Спринтуем, или бежим
+		bSprinting = !(bSprinting);
+		//Но только не крадёмся
+		bSneaking = false;
+		//Когда мы спринтуем, мы всё ещё бежим, логично же.))
+		//IsRunning = false;
+		if (bSprinting)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		}
 	}
 	else
 	{
+		//В бою - только бегаем, ибо нех.
+		// Такое себе решение, но лучше пока ничего не придумал...
+		// А вообще все эти мутки со скоростью перемещения - баловство.
+		bRunning = true;
+		bSneaking = false;
+		bSprinting = false;
 		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
 }
 
 void ACharacterBase::Sneak()
 {
-	// Крадёмся, или идём
-	IsSneaking = !(IsSneaking);
-	//UE_LOG(LogTemp, Warning, TEXT("Stealth Mode is %s"), IsSneaking ? TEXT("true") : TEXT("false"));
-	// Но точно не бежим
-	IsRunning = false;
-	IsSprinting = false;
-
-	if (IsSneaking)
+	if (!bCombatMode)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+		// Крадёмся, или идём
+		bSneaking = !(bSneaking);
+		//UE_LOG(LogTemp, Warning, TEXT("Stealth Mode is %s"), IsSneaking ? TEXT("true") : TEXT("false"));
+		// Но точно не бежим
+		bRunning = false;
+		bSprinting = false;
+
+		if (bSneaking)
+		{
+			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
+		}
+		else
+		{
+			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		}
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		//В бою - только бегаем, ибо нех.
+		// Такое себе решение, но лучше пока ничего не придумал...
+		// А вообще все эти мутки со скоростью перемещения - баловство.
+		bRunning = true;
+		bSneaking = false;
+		bSprinting = false;
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
 }
 
-void ACharacterBase::EnableBattleMode_Implementation()
+void ACharacterBase::CombatModeOn_Implementation()
 {
 
 }
 
-void ACharacterBase::DisableBattleMode_Implementation()
+void ACharacterBase::CombatModeOff_Implementation()
 {
 
 }
 
-void ACharacterBase::SetBattleMode_Implementation()
+void ACharacterBase::SetCombatMode_Implementation()
 {
-	IsBattleModeOn = !(IsBattleModeOn);
+	bCombatMode = !(bCombatMode);
 
-	if (IsBattleModeOn)
+	if (bCombatMode)
 	{
-		DisableBattleMode();
+		CombatModeOn();
 	}
 	else
 	{
-		EnableBattleMode();
+		CombatModeOff();
 	}
 }
 
 void ACharacterBase::AttackFast_Implementation()
 {
-	if (!IsBattleModeOn)
+	if (!bCombatMode)
 	{
-		IsBattleModeOn = true;
+		bCombatMode = true;
 		
 		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
 		//EnableBattleMode();
@@ -196,9 +217,9 @@ void ACharacterBase::AttackFast_Implementation()
 
 void ACharacterBase::AttackStrong_Implementation()
 {
-	if (!IsBattleModeOn)
+	if (!bCombatMode)
 	{
-		IsBattleModeOn = true;
+		bCombatMode = true;
 		
 		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
 		//EnableBattleMode();
@@ -256,7 +277,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
 	
-	PlayerInputComponent->BindAction(TEXT ("BattleMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetBattleMode);
+	PlayerInputComponent->BindAction(TEXT ("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
 	
 	PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
 	PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);

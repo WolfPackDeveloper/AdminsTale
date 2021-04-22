@@ -52,20 +52,20 @@ protected:
 	//State
 		
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool IsRunning = false;
+	bool bRunning = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool IsSprinting = false;
+	bool bSprinting = false;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool IsSneaking = false;
+	bool bSneaking = false;
 
 	//Battle
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
-	bool IsInBattle = false;
+	bool bInBattle = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
-	bool IsBattleModeOn = false;
+	bool bCombatMode = false;
 	
 	// ==========
 	// FUNCTIONS
@@ -91,19 +91,19 @@ protected:
 	//Battle
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void EnableBattleMode();
+	void CombatModeOn();
 
-	void EnableBattleMode_Implementation();
+	void CombatModeOn_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void DisableBattleMode();
+	void CombatModeOff();
 
-	void DisableBattleMode_Implementation();
+	void CombatModeOff_Implementation();
 	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetBattleMode();
+	void SetCombatMode();
 	
-	void SetBattleMode_Implementation();
+	void SetCombatMode_Implementation();
 
 	//Attacking
 

@@ -4,6 +4,7 @@
 
 #include "CoreMinimal.h"
 #include "AdminsTale/Chatacters/CharacterBase.h"
+
 #include "CharacterPlayer.generated.h"
 
 class USpringArmComponent;
@@ -12,6 +13,7 @@ class USceneComponent;
 //class USceletalMeshComponent;
 class UAnimMontage;
 
+class ACharacterEnemy;
 class AWeapon;
 
 UCLASS()
@@ -36,7 +38,19 @@ private:
 	UPROPERTY(EditDefaultsOnly)
 	TSubclassOf<AWeapon> WeaponClass;
 
+	// Не уверен, надо ли именно так... В целом, решение - говно...
+	TSubclassOf<ACharacterEnemy> EnemyBaseClass;
+	float TargetRange = 15000.f;
+	ACharacterEnemy* TargetedEnemy = nullptr;
+	bool bTargetMode = false;
+
 	//virtual void Jump() override;
+
+	void GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, float Range);
+	
+	void SetPlayerRotationMode();
+
+	void SetPlayerToTargetRotation();
 
 protected:
 		
@@ -54,6 +68,13 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
+
+	//Пока таргетится ближайший противник, потом надо как-то переключатель придумать.
+	UFUNCTION(BlueprintCallable)
+	void TargetEnemy();
+
+	UFUNCTION(BlueprintCallable)
+	void StopTargetingEnemy();
 
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
 	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;

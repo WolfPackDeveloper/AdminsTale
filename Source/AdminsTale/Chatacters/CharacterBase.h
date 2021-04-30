@@ -72,13 +72,13 @@ protected:
 	// ==========
 
 	//Movement
-	void MoveForvard(float AxisValue);
+	virtual void MoveForvard(float AxisValue);
 	
-	void MoveRight(float AxisValue);
+	virtual void MoveRight(float AxisValue);
 	
-	void LookUpRate(float AxisValue);
+	virtual void LookUpRate(float AxisValue);
 	
-	void TurnRate(float AxisValue);
+	virtual void TurnRate(float AxisValue);
 	
 	virtual void Jump() override;
 	

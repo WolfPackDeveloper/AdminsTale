@@ -9,6 +9,7 @@
 #include "Blueprint/UserWidget.h"
 #include "Camera/CameraComponent.h"
 #include "Components/InputComponent.h"
+#include "Components/TimelineComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -35,17 +36,22 @@ ACharacterPlayer::ACharacterPlayer()
 	bRunning = false;
 	bSprinting = false;
 	bSneaking = false;
+	bTargetMode = false;
+	bCombatMode = false;
 
-	FVector saLocation;
-	saLocation.Set(0.f, 20.f, 70.f);
-	float saArmLength = 450.f;
+	saDefaultRelativeLocation = FVector(0.f, 20.f, 70.f);
+	saDefaultRelativeRotation = FRotator(0.f, 0.f, 0.f);
+	saDefaultLength = 450.f;
+	saPitchSocketOffset = 100.f;
+	saYawSocketOffset = 50.f;
 
+	// Настройки камеры
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
-	SpringArm->TargetArmLength = saArmLength;
+	SpringArm->TargetArmLength = saDefaultLength;
 	SpringArm->bUsePawnControlRotation = true;
-	SpringArm->SetRelativeLocation(saLocation);
-
+	SpringArm->SetRelativeLocation(saDefaultRelativeLocation);
+	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
 
@@ -64,13 +70,7 @@ ACharacterPlayer::ACharacterPlayer()
 	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
 	//MeleeWeaponArmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
 	
-	//Такие дела - ходим только "вперёд".
-	//bUseControllerRotationYaw = false;
-	//GetCharacterMovement()->bOrientRotationToMovement = true;
-	//Вариант чуть поинтереснее
-	bTargetMode = false;
 	SetPlayerRotationMode();
-
 
 	//Заморочки с приседом...
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -82,28 +82,70 @@ ACharacterPlayer::ACharacterPlayer()
 //	return AbilitySystemComponent;
 //}
 
-//void ACharacterPlayer::Jump()
-//{
-//	if (!GetMesh()->GetAnimInstance()->IsAnyMontagePlaying())
-//	{
-//		Super::Jump();
-//	}
-//}
-
 void ACharacterPlayer::GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, float Range)
 {
-	TArray<AActor*> FoundEnemies;
-	float ClosestEnemyDistance = Range;
+	const FVector TraceStart = GetActorLocation();
+	// Можно начало и конец трассировки назначить в точке актора, тогда он будет вылавливать (видимо, рандомно) цель в радиусе вокруг себя.
+	const FVector TraceEnd = TraceStart + (Camera->GetForwardVector() * TargetRange);
+	
+	TArray<TEnumAsByte<EObjectTypeQuery>> ObjectTypes;
+	
+	// В настройках проекта предварительно создаётся новый тип (будет шестым в массиве, после всяких так WorldStatic и прочей лабуды).
+	// По умолчанию до запуска проекта (да, блеать, и после тоже) посмотреть что к чему - я не понял как.
+	// Первые шесть элементов создаются движком, остальное можно самому придумывать.
+	//ObjectTypeQuery1 - world static
+	//ObjectTypeQuery2 - world dynamic
+	//ObjectTypeQuery3 - pawn
+	//ObjectTypeQuery4 - physics body
+	//ObjectTypeQuery5 - vehicle
+	//ObjectTypeQuery6 - destructible
+	//ObjectTypeQuery7 - custom 1
+	// Возможно создание своих объектов излише - так как, скорее всего можно присвоить какой-нибудь из существующих, но есть нюансы.
+	// И да, не забываем мобам в принтах, или в плюсах выставлять в категории коллизий тип объекта созданный.
 
-	UGameplayStatics::GetAllActorsOfClass(GetWorld(), EnemyClass, FoundEnemies);
+	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
 
-	for (AActor* Enemy : FoundEnemies)
+	TArray<AActor*> ActorsToIgnore;
+	// Это если создавать под это дело отдельный актор - что не лишено смысла, потому что можно повесить это на врагов тоже.
+	ActorsToIgnore.Add(GetOwner());
+	//В кого будем целиться.
+	FHitResult EnemyToTarget;
+
+	// C дебагом трассировки
+	//const bool Hit = UKismetSystemLibrary::SphereTraceSingleForObjects(
+	//	GetWorld(),
+	//	TraceStart,
+	//	TraceEnd,
+	//	TargetRadius,
+	//	ObjectTypes,
+	//	false,
+	//	ActorsToIgnore,
+	//	EDrawDebugTrace::ForDuration,
+	//	EnemyToTarget,
+	//	true,
+	//	FLinearColor::Red,
+	//	FLinearColor::Green,
+	//	5.0f
+	//);
+
+	// Рабочий вариант.
+
+	const bool Hit = UKismetSystemLibrary::SphereTraceSingleForObjects(
+		GetWorld(),
+		TraceStart,
+		TraceEnd,
+		TargetRadius,
+		ObjectTypes,
+		false,
+		ActorsToIgnore,
+		EDrawDebugTrace::None,
+		EnemyToTarget,
+		true
+	);
+
+	if (Hit)
 	{
-		if (Enemy->GetDistanceTo(this) < ClosestEnemyDistance)
-		{
-			ClosestEnemyDistance = Enemy->GetDistanceTo(this);
-			TargetedEnemy = Cast<ACharacterEnemy>(Enemy);
-		}
+		TargetedEnemy = Cast<ACharacterEnemy>(EnemyToTarget.Actor);
 	}
 }
 
@@ -112,47 +154,90 @@ void ACharacterPlayer::SetPlayerRotationMode()
 	if (bTargetMode)
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = false;
-		//GetCharacterMovement()->bUseControllerDesiredRotation = true;
 		// Чтобы крутить головой во время прцеливания нужно выключить эту функцию.
-		bUseControllerRotationYaw = true;
+		//bUseControllerRotationYaw = true;
+		
+		// Двигаем камеру в положение "прицеливание" - нафиг не нужно, просто блажь.)
+		if (IsValid(saTimelineComponent))
+		{
+			saTimelineComponent->Play();
+		}
+
+		// Блокируем ввод для поворота контроллера
+		if (IsValid(Controller))
+		{
+			Controller->SetIgnoreLookInput(true);
+		}
 	}
 	else
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
-		//GetCharacterMovement()->bUseControllerDesiredRotation = false;
 		bUseControllerRotationYaw = false;
+		
+		// По окончании прицеливания - возвращамем всё как было.
+		if (IsValid(saTimelineComponent))
+		{
+			saTimelineComponent->Reverse();
+		}
+		
+		if (IsValid(Controller))
+		{
+			Controller->SetIgnoreLookInput(false);
+		}
 	}
 }
 
-void ACharacterPlayer::SetPlayerToTargetRotation()
+void ACharacterPlayer::SimpleTargetLoking()
 {
-	// Крутимся вокруг цели
-	// С условиями нужно подумать - bTargetEnemy?
-	if (IsValid(Controller) && bCombatMode && IsValid(TargetedEnemy))
+	// Поворачиваем Чара лицом к цели.
+	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
-		//Пока так, вроде бы "прицеливание" работает. Зачем сложности с миллионом ротаторов - пока не ясно.
-		//Также мутно пока с кувырком - кувыркается только вперёд, но не ясно - это из-за того, что анимация такая (возможно, если будет боковой кувырок,
-		//то ситуация выправится, но это не точно). Или же придётся переделывать получение правого вектора для кувырка.
-		
-		//float InterpSpeed = 5.f;
-		//Направление взгляда? Чего бл...?!
-		//FRotator ActorRotation = GetActorRotation();
-		
-		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetedEnemy->GetActorLocation());
-		
-		//FRotator TargetRotation = FRotator(ActorRotation.Roll, ActorRotation.Pitch, LookAtRotation.Yaw);
-		//FRotator CurrentRotation = FMath::RInterpTo(ActorRotation, TargetRotation, GetWorld()->GetDeltaSeconds(), InterpSpeed);
-		
-		//Controller->SetControlRotation(CurrentRotation);
-
-		// Тут головой не крутим - смотрим чётко в цель. Классика.
-		Controller->SetControlRotation(LookAtRotation);
-		
-		// Чтобы можно было во время "прицеливания" головой вертеть (Darksiders 2 style).
-		// Факапится направление движения, когда вращаешь камерой.
-		// Потом подумаю, что да как. Скорее всего нужно логику инпутов менять.
-		//SetActorRotation(LookAtRotation);
+		const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetedEnemy->GetActorLocation());
+		FRotator ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
+		SetActorRotation(ToTargetYawRotation);
 	}
+
+	// Камеру и контроллер ставим в "дефолтное" положение.
+
+	// Двигаемся вокруг цели.
+}
+
+void ACharacterPlayer::AdvancedTargetLocking()
+{
+	// Режим прицеливания - ходим вокруг цели
+	// Darksiders II style - перемещение камеры с лагом длинны SpringArm.
+	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
+	{
+		// Поворачиваем Чара лицом к цели.
+		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetedEnemy->GetActorLocation());
+		FRotator ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
+		SetActorRotation(ToTargetYawRotation);
+		
+		//LookAtRotation = UKismetMathLibrary::FindLookAtRotation(SpringArm->GetComponentLocation(), GetActorLocation());
+		//SpringArm->SetWorldRotation(LookAtRotation);
+
+		// Поворачиваем контроллер "лицом" к цели.
+		// Играться для начала будем с камерой, а не контроллером.
+		LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Camera->GetComponentLocation(), TargetedEnemy->GetActorLocation());
+		//ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
+		Camera->SetWorldRotation(LookAtRotation);
+		
+		Controller->SetControlRotation(Camera->GetComponentRotation());
+
+		// Указываем в градусах - при удалении чара от фокуса - увеличиваем, чтобы оба были на экране.
+		// При сбросе фокуса - когда слишком далеко ушли, прекратили прицеливание, умерла цель - приводим к стандартному значению. Какое оно???
+		// При приближении чара к фокусу - уменьшаем угол соответственно.
+		//Camera->SetFieldOfView();
+
+		// Проблема с возвращением камеры на место после прицеливания.
+		// Проблема с следованием камеры за чаром - интерполяция локациии и ротации.
+		// Отложим пока, а то так и кукухой поехать можно...
+	}
+}
+
+void ACharacterPlayer::UpdateSpringArmOffset(FVector Location)
+{
+	SpringArm->SetWorldLocation(Location);
 }
 
 // Called when the game starts or when spawned
@@ -171,11 +256,13 @@ void ACharacterPlayer::BeginPlay()
 	
 	EnemyBaseClass = ACharacterEnemy::StaticClass();
 
-	//PlayerHUD = CreateWidget(this, PlayerHUDClass);
-	//if (PlayerHUD != nullptr)
-	//{
-	//	PlayerHUD->AddToViewport();
-	//}
+	//If we have a vector curve, bind it's graph to our update function
+	if (CurveSAVector)
+	{
+		OnTimeVSAOffset.BindUFunction(this, FName("UpdateSpringArmOffset"));
+		saTimelineComponent->AddInterpVector(CurveSAVector, OnTimeVSAOffset);
+	}
+
 }
 
 void ACharacterPlayer::Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)
@@ -204,6 +291,8 @@ void ACharacterPlayer::TargetEnemy()
 
 	if (IsValid(TargetedEnemy))
 	{
+		//Может быть здесь будм прицеливаться, м пожет и в SetPlayerRotationMode
+		
 		bTargetMode = true;
 		SetPlayerRotationMode();
 	}
@@ -220,11 +309,14 @@ void ACharacterPlayer::StopTargetingEnemy()
 void ACharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	//Пока что тут, но, возможно имеет смысл перенести это в TurnRate.
-	if (bTargetMode)
+
+	//Бля, ну хуй знает. Говнище какое-то, нужно просто в принтах сделать и не париться.(
+	//CurveTimeline.TickTimeline(DeltaTime);
+
+	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
-		SetPlayerToTargetRotation();
+		//SimpleTargetLoking();
+		AdvancedTargetLocking();
 	}
 }
 
@@ -233,9 +325,38 @@ void ACharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);	
 
-	//Походу привязываемый делегат не должен иметь параметров...
+	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
+	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
+
+	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
+	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
+	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterBase::LookUpRate);
+	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterBase::TurnRate);
+
+	//PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
+	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
+	//PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
+	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
+	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
+
+	//PlayerInputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
+
+	//PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
+	//PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
+	//PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
+	
+	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterPlayer::MoveForvard);
+	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterPlayer::MoveRight);
+	//
+	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ACharacterPlayer::AddControllerPitchInput);
+	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACharacterPlayer::AddControllerYawInput);
+	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterPlayer::LookUpRate);
+	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterPlayer::TurnRate);
+
+	//Походу привязываемый делегат не должен иметь параметров...  Это пи...ж - доказано, см. выше. Тогда в чём дело?
 	//PlayerInputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::CanRoll);
 	//PlayerInputComponent->BindAction (TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::Jump);
+	
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::TargetEnemy);
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Released, this, &ACharacterPlayer::StopTargetingEnemy);
 	

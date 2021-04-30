@@ -4,14 +4,18 @@
 
 #include "CoreMinimal.h"
 #include "AdminsTale/Chatacters/CharacterBase.h"
+#include "Components/TimelineComponent.h"
 
 #include "CharacterPlayer.generated.h"
 
+// Вот это говно не работает без include! Почему?!
+//class FOnTimelineVector;
 class USpringArmComponent;
 class UCameraComponent;
+//class UCurveVector;
 class USceneComponent;
-//class USceletalMeshComponent;
-class UAnimMontage;
+//class UTimelineComponent;
+//class UAnimMontage;
 
 class ACharacterEnemy;
 class AWeapon;
@@ -40,17 +44,33 @@ private:
 
 	// Не уверен, надо ли именно так... В целом, решение - говно...
 	TSubclassOf<ACharacterEnemy> EnemyBaseClass;
-	float TargetRange = 15000.f;
+	UPROPERTY()
 	ACharacterEnemy* TargetedEnemy = nullptr;
-	bool bTargetMode = false;
-
-	//virtual void Jump() override;
-
-	void GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, float Range);
 	
-	void SetPlayerRotationMode();
+	float TargetRange = 1000.f;
+	float TargetRadius = 300.f;
+	bool bTargetMode = false;
+	
+	float saDefaultLength = 450.f;
+	float saPitchSocketOffset = 200.f;
+	float saYawSocketOffset = 100.f;
+	FVector saDefaultRelativeLocation;
+	FRotator saDefaultRelativeRotation;
 
-	void SetPlayerToTargetRotation();
+	//Может быть засунуть это в функцию
+	//FOnTimelineFloat UpdateTimelineProgress;
+	
+	//FTimeline CurveTimeline;
+
+	// Для плавного оффсета палки при прицеливании.
+	//void MoveSpringArmOffset(FVector ResultLocation);
+
+	//TargetMode
+	void GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, float Range);
+	void SetPlayerRotationMode();
+	void SimpleTargetLoking();
+	void AdvancedTargetLocking();
+
 
 protected:
 		
@@ -62,6 +82,25 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	AWeapon* MeleeWeapon;
+
+	// Timeline testing ========================================================================
+
+	//Camera offset moving.
+	UPROPERTY(EditAnywhere, Category = "Timeline")
+	UCurveVector* CurveSAVector;
+
+	//TimelineComponent to animate door meshes
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	UTimelineComponent* saTimelineComponent;
+
+	//Float Track Signature to handle our update track event
+	FOnTimelineVector OnTimeVSAOffset;
+
+	//Function which updates SpringArmOffset
+	UFUNCTION()
+	void UpdateSpringArmOffset(FVector Location);
+
+	// =========================================================================================
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

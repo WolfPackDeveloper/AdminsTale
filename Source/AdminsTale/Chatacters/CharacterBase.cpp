@@ -53,7 +53,7 @@ void ACharacterBase::MoveForvard(float AxisValue)
 	//Останавливаем персонажа, во время действий (атака, кувырок и всякое такое)
 	bool IsInAction = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 	
-	if ((IsValid(Controller)) && (AxisValue != 0.0f) && !IsInAction)
+	if (IsValid(Controller) && (AxisValue != 0.0f) && !IsInAction)
 	{
 		//Почему мне пришлось контроллер прописывать в инклуды, а в примере и так хавает???
 		const FRotator Rotation = Controller->GetControlRotation();
@@ -69,7 +69,7 @@ void ACharacterBase::MoveRight(float AxisValue)
 	//Останавливаем персонажа, во время действий (атака, кувырок и всякое такое)
 	bool IsInAction = GetMesh()->GetAnimInstance()->IsAnyMontagePlaying();
 
-	if ((IsValid(Controller)) && (AxisValue != 0.0f) && !IsInAction)
+	if (IsValid(Controller) && (AxisValue != 0.0f) && !IsInAction)
 	{
 		//Почему мне пришлось контроллер прописывать в инклуды, а в примере и так хавает???
 		const FRotator Rotation = Controller->GetControlRotation();

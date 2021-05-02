@@ -51,11 +51,28 @@ private:
 	float TargetRadius = 300.f;
 	bool bTargetMode = false;
 	
+	UPROPERTY(EditAnywhere, Category = "SpringArm")
 	float saDefaultLength = 450.f;
-	float saPitchSocketOffset = 200.f;
-	float saYawSocketOffset = 100.f;
+	
+	UPROPERTY(EditAnywhere, Category = "SpringArm")
+	float saPitchSocketOffset = 60.f;
+	
+	UPROPERTY(EditAnywhere, Category = "SpringArm")
+	float saYawSocketOffset = 30.f;
+	
 	FVector saDefaultRelativeLocation;
 	FRotator saDefaultRelativeRotation;
+
+	// Timeline testing ========================================================================
+	
+	////Float Track Signature to handle our update track event
+	//FOnTimelineVector OnTimeVSAOffset;
+
+	////Function which updates SpringArmOffset
+	//UFUNCTION()
+	//void UpdateSpringArmOffset(FVector Location);
+
+	// =========================================================================================
 
 	//Может быть засунуть это в функцию
 	//FOnTimelineFloat UpdateTimelineProgress;
@@ -85,20 +102,13 @@ protected:
 
 	// Timeline testing ========================================================================
 
-	//Camera offset moving.
-	UPROPERTY(EditAnywhere, Category = "Timeline")
-	UCurveVector* CurveSAVector;
+	////Camera offset moving.
+	//UPROPERTY(EditAnywhere, Category = "Timeline")
+	//UCurveVector* CurveSAVector;
 
-	//TimelineComponent to animate door meshes
-	UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
-	UTimelineComponent* saTimelineComponent;
-
-	//Float Track Signature to handle our update track event
-	FOnTimelineVector OnTimeVSAOffset;
-
-	//Function which updates SpringArmOffset
-	UFUNCTION()
-	void UpdateSpringArmOffset(FVector Location);
+	////TimelineComponent to animate door meshes
+	//UPROPERTY(VisibleAnywhere, BlueprintReadWrite)
+	//UTimelineComponent* saTimelineComponent;
 
 	// =========================================================================================
 

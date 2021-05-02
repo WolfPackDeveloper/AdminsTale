@@ -42,8 +42,10 @@ ACharacterPlayer::ACharacterPlayer()
 	saDefaultRelativeLocation = FVector(0.f, 20.f, 70.f);
 	saDefaultRelativeRotation = FRotator(0.f, 0.f, 0.f);
 	saDefaultLength = 450.f;
-	saPitchSocketOffset = 100.f;
-	saYawSocketOffset = 50.f;
+	saPitchSocketOffset = 60.f;
+	saYawSocketOffset = 30.f;
+
+	//saTimelineComponent = CreateDefaultSubobject<UTimelineComponent>(TEXT("saTimelineComponent"));
 
 	// Настройки камеры
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
@@ -158,10 +160,10 @@ void ACharacterPlayer::SetPlayerRotationMode()
 		//bUseControllerRotationYaw = true;
 		
 		// Двигаем камеру в положение "прицеливание" - нафиг не нужно, просто блажь.)
-		if (IsValid(saTimelineComponent))
-		{
-			saTimelineComponent->Play();
-		}
+		//if (IsValid(saTimelineComponent))
+		//{
+		//	saTimelineComponent->Play();
+		//}
 
 		// Блокируем ввод для поворота контроллера
 		if (IsValid(Controller))
@@ -175,10 +177,10 @@ void ACharacterPlayer::SetPlayerRotationMode()
 		bUseControllerRotationYaw = false;
 		
 		// По окончании прицеливания - возвращамем всё как было.
-		if (IsValid(saTimelineComponent))
-		{
-			saTimelineComponent->Reverse();
-		}
+		//if (IsValid(saTimelineComponent))
+		//{
+		//	saTimelineComponent->Reverse();
+		//}
 		
 		if (IsValid(Controller))
 		{
@@ -235,10 +237,10 @@ void ACharacterPlayer::AdvancedTargetLocking()
 	}
 }
 
-void ACharacterPlayer::UpdateSpringArmOffset(FVector Location)
-{
-	SpringArm->SetWorldLocation(Location);
-}
+//void ACharacterPlayer::UpdateSpringArmOffset(FVector Location)
+//{
+//	SpringArm->SocketOffset = Location;
+//}
 
 // Called when the game starts or when spawned
 void ACharacterPlayer::BeginPlay()
@@ -257,11 +259,11 @@ void ACharacterPlayer::BeginPlay()
 	EnemyBaseClass = ACharacterEnemy::StaticClass();
 
 	//If we have a vector curve, bind it's graph to our update function
-	if (CurveSAVector)
-	{
-		OnTimeVSAOffset.BindUFunction(this, FName("UpdateSpringArmOffset"));
-		saTimelineComponent->AddInterpVector(CurveSAVector, OnTimeVSAOffset);
-	}
+	//if (CurveSAVector && IsValid(saTimelineComponent))
+	//{
+	//	OnTimeVSAOffset.BindUFunction(this, FName("UpdateSpringArmOffset"));
+	//	saTimelineComponent->AddInterpVector(CurveSAVector, OnTimeVSAOffset);
+	//}
 
 }
 
@@ -325,38 +327,6 @@ void ACharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);	
 
-	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
-	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
-
-	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
-	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
-	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterBase::LookUpRate);
-	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterBase::TurnRate);
-
-	//PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
-	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
-	//PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
-	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
-	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
-
-	//PlayerInputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
-
-	//PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
-	//PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
-	//PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
-	
-	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterPlayer::MoveForvard);
-	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterPlayer::MoveRight);
-	//
-	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &ACharacterPlayer::AddControllerPitchInput);
-	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &ACharacterPlayer::AddControllerYawInput);
-	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterPlayer::LookUpRate);
-	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterPlayer::TurnRate);
-
-	//Походу привязываемый делегат не должен иметь параметров...  Это пи...ж - доказано, см. выше. Тогда в чём дело?
-	//PlayerInputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::CanRoll);
-	//PlayerInputComponent->BindAction (TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::Jump);
-	
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::TargetEnemy);
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Released, this, &ACharacterPlayer::StopTargetingEnemy);
 	

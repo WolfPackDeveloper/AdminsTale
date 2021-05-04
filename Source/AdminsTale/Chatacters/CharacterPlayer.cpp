@@ -11,6 +11,7 @@
 #include "Components/InputComponent.h"
 #include "Components/TimelineComponent.h"
 #include "Components/SkeletalMeshComponent.h"
+#include "Engine/Engine.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
@@ -51,11 +52,14 @@ ACharacterPlayer::ACharacterPlayer()
 	SpringArm = CreateDefaultSubobject<USpringArmComponent>(TEXT("SpringArm"));
 	SpringArm->SetupAttachment(RootComponent);
 	SpringArm->TargetArmLength = saDefaultLength;
-	SpringArm->bUsePawnControlRotation = true;
+	// В SetControlRotation
+	//SpringArm->bUsePawnControlRotation = true;
 	SpringArm->SetRelativeLocation(saDefaultRelativeLocation);
 	
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(SpringArm);
+	// В SetControlRotation
+	//Camera->bUsePawnControlRotation = true;
 
 	//Ставим "крепление" оружия в нормальное положение
 	//FVector ComponentLocation = FVector(11.f, 3.f, 19.f);
@@ -72,7 +76,8 @@ ACharacterPlayer::ACharacterPlayer()
 	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
 	//MeleeWeaponArmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
 	
-	SetPlayerRotationMode();
+	// В BeginPlay() - а то он значения, собацкий сын, меняет на принтовые. А я могу и забыть, что там понавысталвял.
+	//SetPlayerRotationMode();
 
 	//Заморочки с приседом...
 	GetCharacterMovement()->NavAgentProps.bCanCrouch = true;
@@ -158,7 +163,15 @@ void ACharacterPlayer::SetPlayerRotationMode()
 		GetCharacterMovement()->bOrientRotationToMovement = false;
 		// Чтобы крутить головой во время прцеливания нужно выключить эту функцию.
 		//bUseControllerRotationYaw = true;
-		
+		// Отцепляем вращение палки от контроллера (для AdvancedRotation)
+		//SpringArm->bUsePawnControlRotation = false;
+		// Чтобы камера смотрела на цель.
+		Camera->bUsePawnControlRotation = false;
+		// Чтобы крутиться вокруг цели было интереснее.)
+		SpringArm->bEnableCameraRotationLag = true;
+		SpringArm->CameraLagMaxDistance = 20.f;
+		SpringArm->CameraRotationLagSpeed = 4.f;
+
 		// Двигаем камеру в положение "прицеливание" - нафиг не нужно, просто блажь.)
 		//if (IsValid(saTimelineComponent))
 		//{
@@ -169,23 +182,44 @@ void ACharacterPlayer::SetPlayerRotationMode()
 		if (IsValid(Controller))
 		{
 			Controller->SetIgnoreLookInput(true);
+			Controller->SetControlRotation(GetActorRotation());
 		}
+		Camera->SetWorldRotation(GetActorRotation());
+		SpringArm->SetWorldRotation(GetActorRotation());
 	}
 	else
 	{
 		GetCharacterMovement()->bOrientRotationToMovement = true;
 		bUseControllerRotationYaw = false;
-		
+
+		// Если повести камерой во время прицеливания, когда нет фокуса то происходит НЕХ с положение и вращением камеры.
+		//const FRotator PlayerLineOfSight = GetActorRotation();
+		//FRotator Rotation = FRotator(0.f, PlayerLineOfSight.Yaw, 0.f);
+		//SetActorRotation(Rotation);
+				
+		// Палки и камера получают направление контроллера. Иначе при отработке этого кода камера принимает ротацию в самые труднодоступные места - херь какая-то.
+		SpringArm->bUsePawnControlRotation = true;
+		Camera->bUsePawnControlRotation = true;
+		// Чтобы, когда не крутишься было не так интересно.)
+		SpringArm->bEnableCameraRotationLag = false;
+		SpringArm->CameraLagMaxDistance = 5.f;
+		SpringArm->CameraLagSpeed = 10.f;
+		SpringArm->CameraRotationLagSpeed = 10.f;
+
+		if (IsValid(Controller))
+		{
+			Controller->SetIgnoreLookInput(false);
+			Controller->SetControlRotation(GetActorRotation());
+		}
+
+		//SpringArm->SetWorldRotation(Rotation);
+		//Camera->SetWorldRotation(GetControlRotation());
+
 		// По окончании прицеливания - возвращамем всё как было.
 		//if (IsValid(saTimelineComponent))
 		//{
 		//	saTimelineComponent->Reverse();
 		//}
-		
-		if (IsValid(Controller))
-		{
-			Controller->SetIgnoreLookInput(false);
-		}
 	}
 }
 
@@ -195,45 +229,91 @@ void ACharacterPlayer::SimpleTargetLoking()
 	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
 		const FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetedEnemy->GetActorLocation());
-		FRotator ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
-		SetActorRotation(ToTargetYawRotation);
+		FRotator ToTargetRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
+		SetActorRotation(ToTargetRotation);
+
+		Camera->SetWorldRotation(ToTargetRotation);
+
+		Controller->SetControlRotation(ToTargetRotation);
 	}
 
-	// Камеру и контроллер ставим в "дефолтное" положение.
+	// Вменяемое положение и вращение камеры сделать надо.
+
 
 	// Двигаемся вокруг цели.
 }
 
-void ACharacterPlayer::AdvancedTargetLocking()
+void ACharacterPlayer::AdvancedTargetLocking(float DeltaTime)
 {
 	// Режим прицеливания - ходим вокруг цели
 	// Darksiders II style - перемещение камеры с лагом длинны SpringArm.
 	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
+		// Потом можно определить в параметр, или свойство.
+		float InterpSpeed = 8.f;
+		float ControllerYawLag = 90.f;
+		float SpringArmYawLag = 45.f;
+		
 		// Поворачиваем Чара лицом к цели.
 		FRotator LookAtRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TargetedEnemy->GetActorLocation());
-		FRotator ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
-		SetActorRotation(ToTargetYawRotation);
-		
-		//LookAtRotation = UKismetMathLibrary::FindLookAtRotation(SpringArm->GetComponentLocation(), GetActorLocation());
-		//SpringArm->SetWorldRotation(LookAtRotation);
+		FRotator ToTargetRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
+		//float PlayerYaw = FMath::FInterpTo(GetActorRotation().Yaw, LookAtRotation.Yaw, DeltaTime, InterpSpeed);
+		//FRotator ToTargetRotation = GetActorRotation();
+		//ToTargetRotation.Yaw = PlayerYaw;
 
-		// Поворачиваем контроллер "лицом" к цели.
-		// Играться для начала будем с камерой, а не контроллером.
+		SetActorRotation(ToTargetRotation);
+
+		// Выставляем фокус камеры.
 		LookAtRotation = UKismetMathLibrary::FindLookAtRotation(Camera->GetComponentLocation(), TargetedEnemy->GetActorLocation());
-		//ToTargetYawRotation = FRotator(0.f, LookAtRotation.Yaw, 0.f);
 		Camera->SetWorldRotation(LookAtRotation);
+
+		// Определяем направление контроллера
+		float DeltaControllerRotation = fabs(GetActorRotation().Yaw - GetControlRotation().Yaw);
+		//Доводим до нужного угла.
+		if (DeltaControllerRotation > ControllerYawLag)
+		{
+			float DeltaLag = DeltaControllerRotation - ControllerYawLag;
+			float DeltaYaw = GetActorRotation().Yaw + DeltaLag;
+
+			//if (GetControlRotation().Yaw > GetActorRotation().Yaw)
+			//{
+			//	DeltaYaw = GetControlRotation().Yaw - DeltaLag;
+			//}
+			//else
+			//{
+			//	DeltaYaw = GetControlRotation().Yaw + DeltaLag;
+			//}
+
+			float ControllerYaw = FMath::FInterpTo(GetControlRotation().Yaw, DeltaYaw, DeltaTime, InterpSpeed);
+			FRotator ControllerRotation = GetControlRotation();
+			ControllerRotation.Yaw = DeltaYaw;
+
+			Controller->SetControlRotation(ControllerRotation);
+		}
 		
-		Controller->SetControlRotation(Camera->GetComponentRotation());
+		//Определяем положение палки.
+		float DeltaSARotation = fabs(GetActorRotation().Yaw - SpringArm->GetComponentRotation().Yaw);
+		//Доводим до нужного угла.
+		if (DeltaSARotation > SpringArmYawLag)
+		{
+			float DeltaLag = DeltaControllerRotation - SpringArmYawLag;
+			float DeltaYaw = SpringArm->GetComponentRotation().Yaw - DeltaLag;
 
-		// Указываем в градусах - при удалении чара от фокуса - увеличиваем, чтобы оба были на экране.
-		// При сбросе фокуса - когда слишком далеко ушли, прекратили прицеливание, умерла цель - приводим к стандартному значению. Какое оно???
-		// При приближении чара к фокусу - уменьшаем угол соответственно.
-		//Camera->SetFieldOfView();
+			//if (SpringArm->GetComponentRotation().Yaw > GetActorRotation().Yaw)
+			//{
+			//	DeltaYaw = SpringArm->GetComponentRotation().Yaw - DeltaLag;
+			//}
+			//else
+			//{
+			//	DeltaYaw = SpringArm->GetComponentRotation().Yaw + DeltaLag;
+			//}
 
-		// Проблема с возвращением камеры на место после прицеливания.
-		// Проблема с следованием камеры за чаром - интерполяция локациии и ротации.
-		// Отложим пока, а то так и кукухой поехать можно...
+			float saYaw = FMath::FInterpTo(SpringArm->GetComponentRotation().Yaw, DeltaYaw, DeltaTime, InterpSpeed);
+			FRotator saRotation = SpringArm->GetComponentRotation();
+			saRotation.Yaw = DeltaYaw;
+
+			SpringArm->SetWorldRotation(saRotation);
+		}
 	}
 }
 
@@ -258,6 +338,7 @@ void ACharacterPlayer::BeginPlay()
 	
 	EnemyBaseClass = ACharacterEnemy::StaticClass();
 
+	SetPlayerRotationMode();
 	//If we have a vector curve, bind it's graph to our update function
 	//if (CurveSAVector && IsValid(saTimelineComponent))
 	//{
@@ -293,8 +374,6 @@ void ACharacterPlayer::TargetEnemy()
 
 	if (IsValid(TargetedEnemy))
 	{
-		//Может быть здесь будм прицеливаться, м пожет и в SetPlayerRotationMode
-		
 		bTargetMode = true;
 		SetPlayerRotationMode();
 	}
@@ -303,8 +382,8 @@ void ACharacterPlayer::TargetEnemy()
 void ACharacterPlayer::StopTargetingEnemy()
 {
 	bTargetMode = false;
-	SetPlayerRotationMode();
 	TargetedEnemy = nullptr;
+	SetPlayerRotationMode();
 }
 
 // Called every frame
@@ -317,9 +396,17 @@ void ACharacterPlayer::Tick(float DeltaTime)
 
 	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
-		//SimpleTargetLoking();
-		AdvancedTargetLocking();
+		SimpleTargetLoking();
+		//AdvancedTargetLocking(DeltaTime);
 	}
+	//Debug
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Orange, FString::Printf(TEXT("Controller rotation is: %s"), *GetControlRotation().ToString()));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("Character rotation is: %s"), *GetActorRotation().ToString()));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm rotaion (World) is: %s"), *SpringArm->GetComponentRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm Location is: %s"), *SpringArm->GetComponentLocation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm length is: %f"), SpringArm->TargetArmLength));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera rotaion (World) is: %s"), *Camera->GetComponentRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera Locatin (World) is: %s"), *Camera->GetComponentLocation().ToString()));
 }
 
 // Called to bind functionality to input

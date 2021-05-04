@@ -86,7 +86,7 @@ private:
 	void GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, float Range);
 	void SetPlayerRotationMode();
 	void SimpleTargetLoking();
-	void AdvancedTargetLocking();
+	void AdvancedTargetLocking(float DeltaTime);
 
 
 protected:

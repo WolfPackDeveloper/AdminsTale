@@ -12,8 +12,8 @@ UHealthComponent::UHealthComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	DefaultHealth = 100.f;
-	Health = DefaultHealth;
+	MaxHealth = 100.f;
+	Health = MaxHealth;
 }
 
 
@@ -37,5 +37,5 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 		return;
 	}
 	
-	Health = FMath::Clamp(Health - Damage, 0.f, DefaultHealth);
+	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
 }

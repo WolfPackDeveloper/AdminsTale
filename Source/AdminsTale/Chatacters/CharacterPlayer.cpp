@@ -375,6 +375,7 @@ void ACharacterPlayer::TargetEnemy()
 	if (IsValid(TargetedEnemy))
 	{
 		bTargetMode = true;
+		TargetedEnemy->SetTargetedState(true);
 		SetPlayerRotationMode();
 	}
 }
@@ -382,7 +383,13 @@ void ACharacterPlayer::TargetEnemy()
 void ACharacterPlayer::StopTargetingEnemy()
 {
 	bTargetMode = false;
-	TargetedEnemy = nullptr;
+	
+	if (IsValid(TargetedEnemy))
+	{
+		TargetedEnemy->SetTargetedState(false);
+		TargetedEnemy = nullptr;
+	}
+	
 	SetPlayerRotationMode();
 }
 

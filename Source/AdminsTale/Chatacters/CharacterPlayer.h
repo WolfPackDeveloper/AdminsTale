@@ -44,9 +44,10 @@ private:
 
 	// Не уверен, надо ли именно так... В целом, решение - говно...
 	TSubclassOf<ACharacterEnemy> EnemyBaseClass;
-	UPROPERTY()
-	ACharacterEnemy* TargetedEnemy = nullptr;
 	
+	//UPROPERTY()
+	//ACharacterEnemy* TargetedEnemy = nullptr;
+
 	float TargetRange = 1000.f;
 	float TargetRadius = 300.f;
 	bool bTargetMode = false;
@@ -99,6 +100,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
 	AWeapon* MeleeWeapon;
+
+	UPROPERTY(BlueprintReadOnly)
+	ACharacterEnemy* TargetedEnemy = nullptr;
 
 	// Timeline testing ========================================================================
 

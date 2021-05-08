@@ -66,6 +66,10 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	bool bCombatMode = false;
+
+	// Damage Dealing
+	UPROPERTY()
+	float DamageMultiplier = 1;
 	
 	// ==========
 	// FUNCTIONS
@@ -120,21 +124,15 @@ protected:
 	void Action();
 
 public:	
+
 	//Переопределение метода интерфейса
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 	
-	//UFUNCTION(BlueprintPure)
-	//bool GetIsRunning();
+	// Коэффициент используется в расчёте наносимого урона в оружии.
+	float CalculateDamageMultiplier();
 
-	//UFUNCTION(BlueprintPure)
-	//bool GetIsSprinting();
-
-	//UFUNCTION(BlueprintPure)
-	//bool GetIsSneaking();
-		
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
-
 };

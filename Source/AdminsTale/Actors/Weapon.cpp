@@ -5,6 +5,10 @@
 
 #include "Components/CapsuleComponent.h"
 #include "Components/StaticMeshComponent.h"
+#include "Kismet/GameplayStatics.h"
+#include "Kismet/KismetSystemLibrary.h"
+
+#include "AdminsTale/Chatacters/CharacterBase.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -18,7 +22,7 @@ AWeapon::AWeapon()
 	Root = CreateDefaultSubobject<USceneComponent>("Root");
 	SetRootComponent(Root);
 
-	CapsuleComponent = CreateAbstractDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
+	CapsuleComponent = CreateDefaultSubobject<UCapsuleComponent>("CapsuleComponent");
 	CapsuleComponent->SetupAttachment(Root);
 	CapsuleComponent->SetCapsuleRadius(CapsuleRadius);
 	CapsuleComponent->SetCapsuleHalfHeight(CapsuleHalfHeight);
@@ -35,6 +39,20 @@ AWeapon::AWeapon()
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Camera, ECollisionResponse::ECR_Ignore);
 	Mesh->SetCollisionResponseToChannel(ECollisionChannel::ECC_Pawn, ECollisionResponse::ECR_Ignore);
 
+	bStrikes = false;
+
+	MinDamage = 10;
+	MaxDamage = 10;
+
+	SocketEdgeTop = TEXT("TipSocket");
+	SocketEdgeBottom = TEXT("HandleSocket");
+}
+
+float AWeapon::CalculateDamage(float DamageMultiplier)
+{
+	float BaseDamage = FMath::FRandRange(MinDamage, MaxDamage);
+	
+	return BaseDamage * DamageMultiplier;
 }
 
 // Called when the game starts or when spawned
@@ -49,5 +67,105 @@ void AWeapon::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
+	if (bStrikes)
+	{
+		DealDamage();
+	}
+
+}
+
+UStaticMeshComponent* AWeapon::GetMesh() const
+{
+	if (IsValid(Mesh))
+	{
+		return Mesh;
+	}
+
+	return nullptr;
+}
+
+void AWeapon::SetDamageEdge(FName EdgeTopSocket, FName EdgeBotomSocket)
+{
+
+}
+
+void AWeapon::DealDamage()
+{
+	bStrikes = true;
+
+	// ¬от это ба€н разба€нистый - так точно делать нельз€...
+	// ¬опрос - а как эти сокеты и их имена сделать универсальными?
+	// Ќу, пока, как-то так.
+	// SocketEdgeTop
+	//FName SocketTip = TEXT("TipSocket");
+	// SocketEdgeBottom
+	//FName SocketHandle = TEXT("HandleSocket");
+
+	APawn* WeaponOwner = Cast<APawn>(GetOwner());
+	if (WeaponOwner == nullptr) return;
+	AController* OwnerController = WeaponOwner->GetController();
+	if (OwnerController == nullptr) return;
+
+	// ¬от это уже поинтереснее...
+	if (Mesh->DoesSocketExist(SocketEdgeBottom) && Mesh->DoesSocketExist(SocketEdgeTop))
+	{
+		FVector TraceStart = Mesh->GetSocketLocation(SocketEdgeTop);
+		FVector TraceEnd = Mesh->GetSocketLocation(SocketEdgeBottom);
+		float TraceRadius = CapsuleComponent->GetUnscaledCapsuleRadius();
+
+		TArray<AActor*> ActorsToIgnore;
+		// »гнорим держател€ оружи€.
+		ActorsToIgnore.Add(GetOwner());
+		// » на вс€кий случай само оружие.
+		ActorsToIgnore.Add(this);
+
+		FHitResult DamageTarget;
+
+		// C дебагом трассировки
+		//const bool bHit = UKismetSystemLibrary::SphereTraceSingle(
+		//	GetWorld(),
+		//	TraceStart,
+		//	TraceEnd,
+		//	TraceRadius,
+		//	UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		//	false,
+		//	ActorsToIgnore,
+		//	EDrawDebugTrace::ForDuration,
+		//	DamageTarget,
+		//	true,
+		//	FLinearColor::Red,
+		//	FLinearColor::Green,
+		//	2.0f
+		//);
+
+		const bool bHit = UKismetSystemLibrary::SphereTraceSingle(
+			GetWorld(),
+			TraceStart,
+			TraceEnd,
+			TraceRadius,
+			UEngineTypes::ConvertToTraceType(ECC_Visibility),
+			false,
+			ActorsToIgnore,
+			EDrawDebugTrace::None,
+			DamageTarget,
+			true
+		);
+
+		if (bHit)
+		{
+			float Damage = CalculateDamage(Cast<ACharacterBase>(WeaponOwner)->CalculateDamageMultiplier());
+
+			// Ёто событие нанесени€ урона - по идее, здесь должен быть ApplyDamage...
+			// » надо бы заморочитьс€ с DamageType. ’от€ бы парочку дл€ начала сделать - физ урон и хилка.
+			UGameplayStatics::ApplyDamage(DamageTarget.GetActor(), Damage, OwnerController, this, nullptr);
+			
+			bStrikes = false;
+		}
+	}
+}
+
+void AWeapon::StopDamage()
+{
+	bStrikes = false;
 }
 

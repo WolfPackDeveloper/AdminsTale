@@ -3,6 +3,7 @@
 
 #include "HealthComponent.h"
 
+#include "Engine/Engine.h"
 #include "GameFramework/Actor.h"
 
 // Sets default values for this component's properties
@@ -22,6 +23,7 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
+	//Так. Начинаем возню с делегатам...
 	AActor* HealthOwner = GetOwner();
 
 	if (HealthOwner)
@@ -32,10 +34,19 @@ void UHealthComponent::BeginPlay()
 
 void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, AController* InstigatedBy, AActor* DamageCauser)
 {
-	if (Damage <= 0)
+	if (Damage > 0.f)
 	{
-		return;
+		Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+
+		// Debug
+		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Orange, FString::Printf(TEXT("Health is: %f"), Health));
 	}
-	
-	Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
+}
+
+void UHealthComponent::RestoreHealth(float HealingAmount)
+{
+	if (HealingAmount > 0.f)
+	{
+		Health = FMath::Clamp(Health + HealingAmount, 0.f, MaxHealth);
+	}
 }

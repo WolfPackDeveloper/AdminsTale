@@ -113,8 +113,8 @@ void ACharacterPlayer::GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, 
 	ObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
 
 	TArray<AActor*> ActorsToIgnore;
-	// Это если создавать под это дело отдельный актор - что не лишено смысла, потому что можно повесить это на врагов тоже.
 	ActorsToIgnore.Add(GetOwner());
+	
 	//В кого будем целиться.
 	FHitResult EnemyToTarget;
 
@@ -132,12 +132,12 @@ void ACharacterPlayer::GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, 
 	//	true,
 	//	FLinearColor::Red,
 	//	FLinearColor::Green,
-	//	5.0f
+	//	2.0f
 	//);
 
 	// Рабочий вариант.
 
-	const bool Hit = UKismetSystemLibrary::SphereTraceSingleForObjects(
+	const bool bHit = UKismetSystemLibrary::SphereTraceSingleForObjects(
 		GetWorld(),
 		TraceStart,
 		TraceEnd,
@@ -150,7 +150,7 @@ void ACharacterPlayer::GetClosestEnemy(TSubclassOf<ACharacterEnemy> EnemyClass, 
 		true
 	);
 
-	if (Hit)
+	if (bHit)
 	{
 		TargetedEnemy = Cast<ACharacterEnemy>(EnemyToTarget.Actor);
 	}
@@ -398,21 +398,19 @@ void ACharacterPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
 
-	//Бля, ну хуй знает. Говнище какое-то, нужно просто в принтах сделать и не париться.(
-	//CurveTimeline.TickTimeline(DeltaTime);
-
 	if (bCombatMode && bTargetMode && IsValid(TargetedEnemy))
 	{
 		SimpleTargetLoking();
 		//AdvancedTargetLocking(DeltaTime);
 	}
 	//Debug
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Orange, FString::Printf(TEXT("Controller rotation is: %s"), *GetControlRotation().ToString()));
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("Character rotation is: %s"), *GetActorRotation().ToString()));
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm rotaion (World) is: %s"), *SpringArm->GetComponentRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Orange, FString::Printf(TEXT("Controller rotation is: %s"), *GetControlRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Blue, FString::Printf(TEXT("Character rotation is: %s"), *GetActorRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm rotaion (World) is: %s"), *SpringArm->GetComponentRotation().ToString()));
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera rotaion (World) is: %s"), *Camera->GetComponentRotation().ToString()));
+
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm Location is: %s"), *SpringArm->GetComponentLocation().ToString()));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm length is: %f"), SpringArm->TargetArmLength));
-	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera rotaion (World) is: %s"), *Camera->GetComponentRotation().ToString()));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera Locatin (World) is: %s"), *Camera->GetComponentLocation().ToString()));
 }
 

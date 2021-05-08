@@ -236,20 +236,12 @@ UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 	return AbilitySystemComponent;
 }
 
-//bool ACharacterBase::GetIsRunning()
-//{
-//	return IsRunning;
-//}
-//
-//bool ACharacterBase::GetIsSprinting()
-//{
-//	return IsSprinting;
-//}
-//
-//bool ACharacterBase::GetIsSneaking()
-//{
-//	return IsSneaking;
-//}
+float ACharacterBase::CalculateDamageMultiplier()
+{
+	// Тут считаем всякое, когда будет.
+	
+	return DamageMultiplier;
+}
 
 // Called every frame
 void ACharacterBase::Tick(float DeltaTime)

@@ -238,7 +238,8 @@ UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
 
 float ACharacterBase::CalculateDamageMultiplier()
 {
-	// Тут считаем всякое, когда будет.
+	// Тут считаем всякое, когда будет что считать.
+
 	
 	return DamageMultiplier;
 }

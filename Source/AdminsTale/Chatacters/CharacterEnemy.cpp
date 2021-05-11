@@ -23,20 +23,22 @@ ACharacterEnemy::ACharacterEnemy()
 	bCombatMode = false;
 	bTargeted = false;
 
-	FVector2D hbPivot = FVector2D(0.5, 0.5);
-	FVector hbRelativeLocation = FVector(0.f, 0.f, 110.f);
-	//FVector tmRelativeLocation = FVector(0.f, 0.f, 30.f);
+	FVector2D hbPivot = FVector2D(0.75, 0.75);
+	FVector hbRelativeLocation = FVector(0.f, -20.f, 80.f);
 	
 	HealthBar = CreateDefaultSubobject<UWidgetComponent>(TEXT("HealthBar"));
 	HealthBar->SetupAttachment(RootComponent);
 	HealthBar->SetWidgetSpace(EWidgetSpace::Screen);
 	HealthBar->SetPivot(hbPivot);
 	HealthBar->SetRelativeLocation(hbRelativeLocation);
-	HealthBar->bVisible = false;
+	HealthBar->SetVisibility(false);
 
-	//TargetMark = CreateDefaultSubobject<UStaticMeshComponent>(TEXT("TargetMark"));
-	//TargetMark->SetupAttachment(HealthBar);
-
+	BattleText = CreateDefaultSubobject<UWidgetComponent>(TEXT("BattleText"));
+	BattleText->SetupAttachment(RootComponent);
+	BattleText->SetWidgetSpace(EWidgetSpace::Screen);
+	BattleText->SetPivot(hbPivot);
+	BattleText->SetRelativeLocation(hbRelativeLocation);
+	//HealthBar->SetVisibility(false);
 }
 
 void ACharacterEnemy::BeginPlay()
@@ -54,6 +56,6 @@ void ACharacterEnemy::SetTargetedState(bool TargetState)
 		bTargeted = TargetState;
 		if (IsValid(HealthBar))
 		{
-			HealthBar->bVisible = TargetState;
+			HealthBar->SetVisibility(TargetState);
 		}
 }

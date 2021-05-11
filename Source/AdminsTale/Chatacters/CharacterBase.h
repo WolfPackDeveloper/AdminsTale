@@ -68,7 +68,7 @@ protected:
 	bool bCombatMode = false;
 
 	// Damage Dealing
-	UPROPERTY()
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageMultiplier = 1;
 	
 	// ==========

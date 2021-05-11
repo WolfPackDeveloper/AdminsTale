@@ -44,8 +44,10 @@ AWeapon::AWeapon()
 	MinDamage = 10;
 	MaxDamage = 10;
 
-	SocketEdgeTop = TEXT("TipSocket");
-	SocketEdgeBottom = TEXT("HandleSocket");
+	SetDamageEdge(TEXT("TipSocket"), TEXT("HandleSocket"));
+
+	//SocketEdgeTop = TEXT("TipSocket");
+	//SocketEdgeBottom = TEXT("HandleSocket");
 }
 
 float AWeapon::CalculateDamage(float DamageMultiplier)
@@ -86,7 +88,8 @@ UStaticMeshComponent* AWeapon::GetMesh() const
 
 void AWeapon::SetDamageEdge(FName EdgeTopSocket, FName EdgeBotomSocket)
 {
-
+	SocketEdgeTop = EdgeTopSocket;
+	SocketEdgeBottom = EdgeBotomSocket;
 }
 
 void AWeapon::DealDamage()

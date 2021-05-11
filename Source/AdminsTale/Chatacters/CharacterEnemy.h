@@ -26,11 +26,11 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Nameplates")
-	//UStaticMeshComponent* TargetMark = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Nameplates")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UWidgetComponent* HealthBar = nullptr;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
+	UWidgetComponent* BattleText = nullptr;
 
 	bool bTargeted = false;
 

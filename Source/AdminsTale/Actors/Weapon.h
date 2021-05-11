@@ -34,14 +34,17 @@ private:
 	FName SocketEdgeTop;
 	FName SocketEdgeBottom;
 
-	// На будущее...
-	float MinDamage = 0;
-	float MaxDamage = 0;
-
 	float CalculateDamage(float DamageMultiplier);
 
 protected:
 	
+	// На будущее...
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float MinDamage = 0;
+	
+	UPROPERTY(EditAnywhere, Category = "Damage")
+	float MaxDamage = 0;
+
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 

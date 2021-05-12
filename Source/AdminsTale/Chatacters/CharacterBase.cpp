@@ -3,6 +3,7 @@
 
 #include "CharacterBase.h"
 #include "AdminsTale/Chatacters/Components/HealthComponent.h"
+#include "AdminsTale/Actors/Weapon.h"
 
 #include "AbilitySystemComponent.h"
 #include "Components/InputComponent.h"
@@ -31,6 +32,13 @@ ACharacterBase::ACharacterBase()
 	bRunning = false;
 	bSprinting = false;
 	bSneaking = false;
+
+	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
+	MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));
+
+	MeleeWeaponArmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponArmed"));
+	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
+	
 }
 
 // Called when the game starts or when spawned
@@ -39,6 +47,11 @@ void ACharacterBase::BeginPlay()
 	Super::BeginPlay();
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+
+	MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+	//Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
+	MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	MeleeWeapon->SetOwner(this);
 
 } 
 
@@ -180,28 +193,14 @@ void ACharacterBase::Sneak()
 	}
 }
 
-void ACharacterBase::CombatModeOn_Implementation()
+void ACharacterBase::EnableCombatMode(bool bEnable)
 {
-
-}
-
-void ACharacterBase::CombatModeOff_Implementation()
-{
-
+	bCombatMode = bEnable;
 }
 
 void ACharacterBase::SetCombatMode_Implementation()
 {
-	bCombatMode = !(bCombatMode);
-
-	if (bCombatMode)
-	{
-		CombatModeOn();
-	}
-	else
-	{
-		CombatModeOff();
-	}
+	EnableCombatMode(!(bCombatMode));
 }
 
 void ACharacterBase::AttackFast_Implementation()

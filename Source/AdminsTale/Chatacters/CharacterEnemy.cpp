@@ -38,7 +38,10 @@ ACharacterEnemy::ACharacterEnemy()
 	BattleText->SetWidgetSpace(EWidgetSpace::Screen);
 	BattleText->SetPivot(hbPivot);
 	BattleText->SetRelativeLocation(hbRelativeLocation);
-	//HealthBar->SetVisibility(false);
+}
+
+void ACharacterEnemy::TargetPlayer()
+{
 }
 
 void ACharacterEnemy::BeginPlay()

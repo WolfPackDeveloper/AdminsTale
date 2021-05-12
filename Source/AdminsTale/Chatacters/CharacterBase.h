@@ -7,8 +7,10 @@
 #include "AbilitySystemInterface.h"
 #include "CharacterBase.generated.h"
 
-class UHealthComponent;
 class UAbilitySystemComponent;
+class UHealthComponent;
+class USceneComponent;
+class AWeapon;
 
 UCLASS()
 class ADMINSTALE_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
@@ -33,6 +35,19 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	UHealthComponent* Health = nullptr;
 	
+	//Weapon (even empty)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USceneComponent* MeleeWeaponUnarmed = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	USceneComponent* MeleeWeaponArmed = nullptr;
+	
+	UPROPERTY(EditDefaultsOnly, Category = "Weapon")
+	TSubclassOf<AWeapon> WeaponClass;
+	
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	AWeapon* MeleeWeapon;
+
 	//Movement
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float BaseTurnRate = 70.f;
@@ -92,18 +107,10 @@ protected:
 	
 	void Sneak();
 
-	//Battle
+	//Combat Mode
+	UFUNCTION()
+	void EnableCombatMode(bool bEnable);
 
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void CombatModeOn();
-
-	void CombatModeOn_Implementation();
-
-	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void CombatModeOff();
-
-	void CombatModeOff_Implementation();
-	
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetCombatMode();
 	

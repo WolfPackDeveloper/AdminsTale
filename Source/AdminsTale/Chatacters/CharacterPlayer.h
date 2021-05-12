@@ -18,7 +18,7 @@ class USceneComponent;
 //class UAnimMontage;
 
 class ACharacterEnemy;
-class AWeapon;
+//class AWeapon;
 
 UCLASS()
 class ADMINSTALE_API ACharacterPlayer : public ACharacterBase
@@ -39,8 +39,8 @@ public:
 
 private:
 
-	UPROPERTY(EditDefaultsOnly)
-	TSubclassOf<AWeapon> WeaponClass;
+	//UPROPERTY(EditDefaultsOnly)
+	//TSubclassOf<AWeapon> WeaponClass;
 
 	// Не уверен, надо ли именно так... В целом, решение - говно...
 	TSubclassOf<ACharacterEnemy> EnemyBaseClass;
@@ -92,14 +92,14 @@ private:
 
 protected:
 		
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	USceneComponent* MeleeWeaponUnarmed = nullptr;
-	
-	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	USceneComponent* MeleeWeaponArmed = nullptr;
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	//USceneComponent* MeleeWeaponUnarmed = nullptr;
+	//
+	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
+	//USceneComponent* MeleeWeaponArmed = nullptr;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	AWeapon* MeleeWeapon;
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
+	//AWeapon* MeleeWeapon;
 
 	UPROPERTY(BlueprintReadOnly)
 	ACharacterEnemy* TargetedEnemy = nullptr;

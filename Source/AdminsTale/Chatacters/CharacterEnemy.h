@@ -19,7 +19,11 @@ class ADMINSTALE_API ACharacterEnemy : public ACharacterBase
 public:
 	
 	ACharacterEnemy();
+
 private:
+
+	UFUNCTION()
+	void TargetPlayer();
 
 protected:
 

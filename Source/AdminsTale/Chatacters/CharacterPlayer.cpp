@@ -3,7 +3,7 @@
 
 #include "CharacterPlayer.h"
 #include "AdminsTale/Chatacters/CharacterEnemy.h"
-#include "AdminsTale/Actors/Weapon.h"
+//#include "AdminsTale/Actors/Weapon.h"
 
 #include "Animation/AnimInstance.h"
 #include "Blueprint/UserWidget.h"
@@ -65,16 +65,16 @@ ACharacterPlayer::ACharacterPlayer()
 	//FVector ComponentLocation = FVector(11.f, 3.f, 19.f);
 	//FRotator ComponentRotation = FRotator(15.f, 180.f, 25.f);
 
-	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
-	MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));
-	//MeleeWeaponUnarmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
+	//MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
+	//MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));
+	////MeleeWeaponUnarmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
 
-	//ComponentLocation = FVector(35.f, -19.f, 3.f);
-	//ComponentRotation = FRotator(90.f, -15.f, 180.f);
+	////ComponentLocation = FVector(35.f, -19.f, 3.f);
+	////ComponentRotation = FRotator(90.f, -15.f, 180.f);
 
-	MeleeWeaponArmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponArmed"));
-	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
-	//MeleeWeaponArmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
+	//MeleeWeaponArmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponArmed"));
+	//MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
+	////MeleeWeaponArmed->SetRelativeLocationAndRotation(ComponentLocation, ComponentRotation);
 	
 	// В BeginPlay() - а то он значения, собацкий сын, меняет на принтовые. А я могу и забыть, что там понавысталвял.
 	//SetPlayerRotationMode();
@@ -331,10 +331,10 @@ void ACharacterPlayer::BeginPlay()
 	bRunning = true;
 	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 
-	MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
-	//Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
-	MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	MeleeWeapon->SetOwner(this);
+	//MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+	////Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
+	//MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	//MeleeWeapon->SetOwner(this);
 	
 	EnemyBaseClass = ACharacterEnemy::StaticClass();
 

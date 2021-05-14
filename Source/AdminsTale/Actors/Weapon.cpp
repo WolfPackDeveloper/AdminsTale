@@ -9,6 +9,9 @@
 #include "Kismet/KismetSystemLibrary.h"
 
 #include "AdminsTale/Chatacters/CharacterBase.h"
+#include "AdminsTale/Objects/DamageTypes/DT_Base.h"
+#include "AdminsTale/Objects/DamageTypes/DT_Physical.h"
+#include "AdminsTale/Objects/DamageTypes/DT_Healing.h"
 
 // Sets default values
 AWeapon::AWeapon()
@@ -48,6 +51,9 @@ AWeapon::AWeapon()
 
 	//SocketEdgeTop = TEXT("TipSocket");
 	//SocketEdgeBottom = TEXT("HandleSocket");
+
+	// Эксперименты с уроном.
+	DamageType = UDT_Physical::StaticClass();
 }
 
 float AWeapon::CalculateDamage(float DamageMultiplier)
@@ -156,11 +162,14 @@ void AWeapon::DealDamage()
 
 		if (bHit)
 		{
-			float Damage = CalculateDamage(Cast<ACharacterBase>(WeaponOwner)->CalculateDamageMultiplier());
-
 			// Это событие нанесения урона - по идее, здесь должен быть ApplyDamage...
 			// И надо бы заморочиться с DamageType. Хотя бы парочку для начала сделать - физ урон и хилка.
-			UGameplayStatics::ApplyDamage(DamageTarget.GetActor(), Damage, OwnerController, this, nullptr);
+			//UGameplayStatics::ApplyDamage(DamageTarget.GetActor(), Damage, OwnerController, this, nullptr);
+			if (DamageType)
+			{
+				float Damage = CalculateDamage(Cast<ACharacterBase>(WeaponOwner)->CalculateDamageMultiplier());
+				UGameplayStatics::ApplyDamage(DamageTarget.GetActor(), Damage, OwnerController, this, DamageType);
+			}
 			
 			bStrikes = false;
 		}

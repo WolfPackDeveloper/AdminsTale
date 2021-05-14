@@ -2,6 +2,7 @@
 
 
 #include "HealthComponent.h"
+#include "AdminsTale/Objects/DamageTypes/DT_Base.h"
 
 #include "Engine/Engine.h"
 #include "GameFramework/Actor.h"
@@ -36,17 +37,15 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 {
 	if (Damage > 0.f)
 	{
-		Health = FMath::Clamp(Health - Damage, 0.f, MaxHealth);
-
+		const UDT_Base* IncomingDamageType = Cast<UDT_Base, UDamageType>(DamageType);
+		
+		if (IncomingDamageType)
+		{
+			float FinalDamage = IncomingDamageType->ModifyDamage(Damage);
+			Health = FMath::Clamp(Health - FinalDamage, 0.f, MaxHealth);
+		}
+		
 		// Debug
 		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Orange, FString::Printf(TEXT("Health is: %f"), Health));
-	}
-}
-
-void UHealthComponent::RestoreHealth(float HealingAmount)
-{
-	if (HealingAmount > 0.f)
-	{
-		Health = FMath::Clamp(Health + HealingAmount, 0.f, MaxHealth);
 	}
 }

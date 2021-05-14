@@ -8,6 +8,7 @@
 #include "Weapon.generated.h"
 
 class UCapsuleComponent;
+class UDT_Base;
 
 UCLASS()
 class ADMINSTALE_API AWeapon : public AActor
@@ -38,12 +39,17 @@ private:
 
 protected:
 	
-	// На будущее...
+	// Damage
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	float MinDamage = 0;
 	
 	UPROPERTY(EditAnywhere, Category = "Damage")
 	float MaxDamage = 0;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Damage")
+	//UDT_Base* DamageType;
+	//UDamageType* DamageType;
+	TSubclassOf<UDamageType> DamageType;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

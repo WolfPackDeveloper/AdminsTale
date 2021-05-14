@@ -27,8 +27,4 @@ protected:
 
 	UFUNCTION()
 	void TakeDamage(AActor* DamagedActor, float Damage, const class UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser);
-
-	// Вроде бы и не нужно, так как это делается через получение урона и DamageType.
-	UFUNCTION(BlueprintCallable)
-	void RestoreHealth(float HealingAmount);
 };

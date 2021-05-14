@@ -225,6 +225,37 @@ void ACharacterBase::AttackStrong_Implementation()
 	}
 }
 
+void ACharacterBase::OnHealthEnded()
+{
+	
+}
+
+void ACharacterBase::DyingAction()
+{
+	
+	//ACharacter::PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
+	//{
+	//	UAnimInstance* AnimInstance = (Mesh) ? Mesh->GetAnimInstance() : nullptr;
+	//	if (AnimMontage && AnimInstance)
+	//	{
+	//		float const Duration = AnimInstance->Montage_Play(AnimMontage, InPlayRate);
+
+	//		if (Duration > 0.f)
+	//		{
+	//			// Start at a given Section.
+	//			if (StartSectionName != NAME_None)
+	//			{
+	//				AnimInstance->Montage_JumpToSection(StartSectionName, AnimMontage);
+	//			}
+
+	UAnimInstance* AnimInstance = (Mesh) ? Mesh->GetAnimInstance() : nullptr;
+	if (AnimInstance)
+	{
+		//AnimInstance->GetCurrentAnimMontage();
+	}
+
+}
+
 void ACharacterBase::Action()
 {
 

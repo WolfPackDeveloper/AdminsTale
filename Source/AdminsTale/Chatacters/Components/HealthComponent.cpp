@@ -45,6 +45,11 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 			Health = FMath::Clamp(Health - FinalDamage, 0.f, MaxHealth);
 		}
 		
+		if (Health <= 0.f)
+		{
+			OnHealthEnded.Broadcast();
+		}
+		
 		// Debug
 		//GEngine->AddOnScreenDebugMessage(-1, 1.f, FColor::Orange, FString::Printf(TEXT("Health is: %f"), Health));
 	}

@@ -117,7 +117,6 @@ protected:
 	void SetCombatMode_Implementation();
 
 	//Attacking
-
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackFast();
 
@@ -128,6 +127,13 @@ protected:
 
 	void AttackStrong_Implementation();
 
+	// Health
+	// Delegate
+	void OnHealthEnded();
+	//Delegate content
+	void DyingAction();
+
+	//Other
 	void Action();
 
 public:	

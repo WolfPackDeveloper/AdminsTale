@@ -6,6 +6,8 @@
 #include "Components/ActorComponent.h"
 #include "HealthComponent.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnHealthEnded);
+
 UCLASS()
 class ADMINSTALE_API UHealthComponent : public UActorComponent
 {
@@ -14,6 +16,9 @@ class ADMINSTALE_API UHealthComponent : public UActorComponent
 public:	
 	// Sets default values for this component's properties
 	UHealthComponent();
+
+	UPROPERTY(BlueprintAssignable)
+	FOnHealthEnded OnHealthEnded;
 
 protected:
 	// Called when the game starts

@@ -92,6 +92,16 @@ UStaticMeshComponent* AWeapon::GetMesh() const
 	return nullptr;
 }
 
+UCapsuleComponent* AWeapon::GetCapsuleComponent() const
+{
+	if (IsValid(CapsuleComponent))
+	{
+		return CapsuleComponent;
+	}
+
+	return nullptr;
+}
+
 void AWeapon::SetDamageEdge(FName EdgeTopSocket, FName EdgeBotomSocket)
 {
 	SocketEdgeTop = EdgeTopSocket;

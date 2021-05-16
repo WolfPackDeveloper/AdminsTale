@@ -62,6 +62,9 @@ public:
 	UStaticMeshComponent* GetMesh() const;
 
 	UFUNCTION(BlueprintCallable)
+	UCapsuleComponent* GetCapsuleComponent() const;
+
+	UFUNCTION(BlueprintCallable)
 	void SetDamageEdge(FName EdgeTopSocket, FName EdgeBotomSocket);
 
 	UFUNCTION(BlueprintCallable)

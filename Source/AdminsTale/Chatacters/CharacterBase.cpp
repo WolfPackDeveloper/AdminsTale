@@ -6,9 +6,11 @@
 #include "AdminsTale/Actors/Weapon.h"
 
 #include "AbilitySystemComponent.h"
+#include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h"
@@ -52,6 +54,12 @@ void ACharacterBase::BeginPlay()
 	//Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
 	MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
 	MeleeWeapon->SetOwner(this);
+
+	// Привязка делегата.
+	if (Health)
+	{
+		Health->OnHealthEnded.AddDynamic(this, &ACharacterBase::OnHealthEnded);
+	}
 
 } 
 
@@ -230,30 +238,27 @@ void ACharacterBase::OnHealthEnded()
 	
 }
 
-void ACharacterBase::DyingAction()
+void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
 {
+	// Выбираем рандомную секцию  для проигрывания.
+	int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
+	FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
+
+	PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
+
+	//Delay();
+	FTimerHandle RagdollDelayTimer;
+	GetWorld()->GetTimerManager().SetTimer(RagdollDelayTimer, DelayTime, false);
 	
-	//ACharacter::PlayAnimMontage(class UAnimMontage* AnimMontage, float InPlayRate, FName StartSectionName)
-	//{
-	//	UAnimInstance* AnimInstance = (Mesh) ? Mesh->GetAnimInstance() : nullptr;
-	//	if (AnimMontage && AnimInstance)
-	//	{
-	//		float const Duration = AnimInstance->Montage_Play(AnimMontage, InPlayRate);
-
-	//		if (Duration > 0.f)
-	//		{
-	//			// Start at a given Section.
-	//			if (StartSectionName != NAME_None)
-	//			{
-	//				AnimInstance->Montage_JumpToSection(StartSectionName, AnimMontage);
-	//			}
-
-	UAnimInstance* AnimInstance = (Mesh) ? Mesh->GetAnimInstance() : nullptr;
-	if (AnimInstance)
+	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
 	{
-		//AnimInstance->GetCurrentAnimMontage();
+		// Если физика и веса не настроены, то чар осядет, как озимый.)
+		// Но потом, по идее, будет мотыляться, как тряпочка, так что, возможно имеет смысл вклюсить сразу обратно.
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 
+	GetWorldTimerManager().ClearTimer(RagdollDelayTimer);
 }
 
 void ACharacterBase::Action()

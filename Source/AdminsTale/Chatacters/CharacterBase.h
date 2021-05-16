@@ -131,7 +131,8 @@ protected:
 	// Delegate
 	void OnHealthEnded();
 	//Delegate content
-	void DyingAction();
+	UFUNCTION(BlueprintCallable)
+	void DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
 
 	//Other
 	void Action();

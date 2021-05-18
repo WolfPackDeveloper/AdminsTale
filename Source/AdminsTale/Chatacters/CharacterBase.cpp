@@ -6,6 +6,7 @@
 #include "AdminsTale/Actors/Weapon.h"
 
 #include "AbilitySystemComponent.h"
+#include "Animation/AnimInstance.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
@@ -34,6 +35,7 @@ ACharacterBase::ACharacterBase()
 	bRunning = false;
 	bSprinting = false;
 	bSneaking = false;
+	bIsDead = false;
 
 	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
 	MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));
@@ -41,6 +43,31 @@ ACharacterBase::ACharacterBase()
 	MeleeWeaponArmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponArmed"));
 	MeleeWeaponArmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponArmedSocket"));
 	
+}
+
+void ACharacterBase::DyingActionDelayed()
+{
+	GetWorldTimerManager().ClearTimer(DelayTimer);
+
+	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+	{
+		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
+		if (IsValid(MeleeWeapon))
+		{
+			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
+			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
+		// Какая-то ситуация! Чар оседает под себя и размазывается по полу. Ничего не помогает.
+		// Ладно, потом решим вопрос - на следующей итерации.
+		//GetMesh()->SetSimulatePhysics(true);
+		// или
+		//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorTickEnabled(false);
+	}
 }
 
 // Called when the game starts or when spawned
@@ -240,25 +267,37 @@ void ACharacterBase::OnHealthEnded()
 
 void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
 {
-	// Выбираем рандомную секцию  для проигрывания.
-	int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
-	FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
-
-	PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
-
-	//Delay();
-	FTimerHandle RagdollDelayTimer;
-	GetWorld()->GetTimerManager().SetTimer(RagdollDelayTimer, DelayTime, false);
-	
-	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+	if (!bIsDead)
 	{
-		// Если физика и веса не настроены, то чар осядет, как озимый.)
-		// Но потом, по идее, будет мотыляться, как тряпочка, так что, возможно имеет смысл вклюсить сразу обратно.
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	}
+		bIsDead = true;
 
-	GetWorldTimerManager().ClearTimer(RagdollDelayTimer);
+		// Выбираем рандомную секцию  для проигрывания.
+		int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
+		FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
+
+		// Чтобы не дёргался, если получит по рылу во время смерти.
+		if (IsValid(GetMesh()))
+		{
+			GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		}
+
+		DetachFromControllerPendingDestroy();
+
+		// Заканчиваем все анимации
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
+
+			AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
+		}
+
+		PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
+
+		GetWorld()->GetTimerManager().SetTimer(DelayTimer, this, &ACharacterBase::DyingActionDelayed, DelayTime, false);
+
+		// Перенесено в DyingActionDelayed - мудянка, конечно. Но других вариантов, что-то не нашёл.
+	}
 }
 
 void ACharacterBase::Action()
@@ -277,6 +316,16 @@ float ACharacterBase::CalculateDamageMultiplier()
 
 	
 	return DamageMultiplier;
+}
+
+bool ACharacterBase::IsSneaking()
+{
+	return bSneaking;
+}
+
+bool ACharacterBase::IsDead()
+{
+	return bIsDead;
 }
 
 // Called every frame

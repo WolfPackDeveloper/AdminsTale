@@ -17,11 +17,16 @@ class ADMINSTALE_API ACharacterBase : public ACharacter, public IAbilitySystemIn
 {
 	GENERATED_BODY()
 
-private:
-
 public:
 	// Sets default values for this character's properties
 	ACharacterBase();
+
+private:
+
+	//Delay();
+	FTimerHandle DelayTimer;
+
+	void DyingActionDelayed();
 
 protected:
 	// Called when the game starts or when spawned
@@ -81,6 +86,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	bool bCombatMode = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	bool bIsDead = false;
 
 	// Damage Dealing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
@@ -144,6 +152,13 @@ public:
 	
 	// Коэффициент используется в расчёте наносимого урона в оружии.
 	float CalculateDamageMultiplier();
+
+	UFUNCTION(BlueprintCallable)
+	bool IsSneaking();
+
+
+	UFUNCTION(BlueprintCallable)
+	bool IsDead();
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

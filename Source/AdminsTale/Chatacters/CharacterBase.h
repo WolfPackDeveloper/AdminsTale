@@ -80,7 +80,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
 	bool bSneaking = false;
 
-	//Battle
+	// Combat
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
 	bool bInBattle = false;
 
@@ -93,7 +93,11 @@ protected:
 	// Damage Dealing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageMultiplier = 1;
-	
+
+	UPROPERTY(BlueprintReadWrite)
+	AActor* Target = nullptr;
+
+
 	// ==========
 	// FUNCTIONS
 	// ==========

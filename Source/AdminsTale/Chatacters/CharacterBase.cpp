@@ -36,6 +36,7 @@ ACharacterBase::ACharacterBase()
 	bSprinting = false;
 	bSneaking = false;
 	bIsDead = false;
+	Target = nullptr;
 
 	MeleeWeaponUnarmed = CreateDefaultSubobject<USceneComponent>(TEXT("MeleeWeaponUnarmed"));
 	MeleeWeaponUnarmed->AttachToComponent(GetMesh(), FAttachmentTransformRules::SnapToTargetNotIncludingScale, TEXT("MeleeWeaponUnarmedSocket"));

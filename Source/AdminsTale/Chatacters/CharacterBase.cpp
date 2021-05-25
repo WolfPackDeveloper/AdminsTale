@@ -32,9 +32,9 @@ ACharacterBase::ACharacterBase()
 	RunSpeed = 350.f;
 	WalkSpeed = 150.f;
 	SneakSpeed = 150.f;
-	bRunning = false;
-	bSprinting = false;
-	bSneaking = false;
+	
+	CurrentMovementStatus = EMovementStatus::Walk;
+	
 	bIsDead = false;
 	Target = nullptr;
 
@@ -149,84 +149,48 @@ void ACharacterBase::Jump()
 
 void ACharacterBase::Run()
 {
-	//Бежим, или идём
-	bRunning = !(bRunning);
-	//UE_LOG(LogTemp, Warning, TEXT("Run Mode is %s"), IsRunning ? TEXT("true") : TEXT("false"));
-	//Но только не крадёмся
-	bSneaking = false;
-	bSprinting = false;
-
-	if (bRunning)
+	if (CurrentMovementStatus == EMovementStatus::Run)
 	{
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		CurrentMovementStatus = EMovementStatus::Walk;
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 	else
 	{
-		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
+		CurrentMovementStatus = EMovementStatus::Run;
+		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 	}
 }
 
 void ACharacterBase::Sprint()
 {
-	if (!bCombatMode)
-	{
-		//Спринтуем, или бежим
-		bSprinting = !(bSprinting);
-		//Но только не крадёмся
-		bSneaking = false;
-		//Когда мы спринтуем, мы всё ещё бежим, логично же.))
-		//IsRunning = false;
-		if (bSprinting)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-		}
-	}
-	else
-	{
-		//В бою - только бегаем, ибо нех.
-		// Такое себе решение, но лучше пока ничего не придумал...
-		// А вообще все эти мутки со скоростью перемещения - баловство.
-		bRunning = true;
-		bSneaking = false;
-		bSprinting = false;
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
-	}
+	CurrentMovementStatus = EMovementStatus::Sprint;
+	GetCharacterMovement()->MaxWalkSpeed = SprintSpeed;
+}
+
+void ACharacterBase::StopSprinting()
+{
+	CurrentMovementStatus = EMovementStatus::Run;
+	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 }
 
 void ACharacterBase::Sneak()
 {
-	if (!bCombatMode)
+	if (CurrentMovementStatus == EMovementStatus::Sneack)
 	{
-		// Крадёмся, или идём
-		bSneaking = !(bSneaking);
-		//UE_LOG(LogTemp, Warning, TEXT("Stealth Mode is %s"), IsSneaking ? TEXT("true") : TEXT("false"));
-		// Но точно не бежим
-		bRunning = false;
-		bSprinting = false;
-
-		if (bSneaking)
-		{
-			GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
-		}
-		else
-		{
-			GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
-		}
+		CurrentMovementStatus = EMovementStatus::Walk;
+		GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 	}
 	else
 	{
-		//В бою - только бегаем, ибо нех.
-		// Такое себе решение, но лучше пока ничего не придумал...
-		// А вообще все эти мутки со скоростью перемещения - баловство.
-		bRunning = true;
-		bSneaking = false;
-		bSprinting = false;
-		GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+		CurrentMovementStatus = EMovementStatus::Sneack;
+		GetCharacterMovement()->MaxWalkSpeed = SneakSpeed;
 	}
+}
+
+void ACharacterBase::Walk()
+{
+	CurrentMovementStatus = EMovementStatus::Walk;
+	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
 void ACharacterBase::EnableCombatMode(bool bEnable)
@@ -244,9 +208,6 @@ void ACharacterBase::AttackFast_Implementation()
 	if (!bCombatMode)
 	{
 		bCombatMode = true;
-		
-		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
-		//EnableBattleMode();
 	}
 }
 
@@ -255,9 +216,6 @@ void ACharacterBase::AttackStrong_Implementation()
 	if (!bCombatMode)
 	{
 		bCombatMode = true;
-		
-		// Пока не понятно, как лучше - анимация доставания оружия всё равно не проигрывается, да и долго...
-		//EnableBattleMode();
 	}
 }
 
@@ -319,9 +277,30 @@ float ACharacterBase::CalculateDamageMultiplier()
 	return DamageMultiplier;
 }
 
-bool ACharacterBase::IsSneaking()
+EMovementStatus ACharacterBase::GetMovementStatus() const
 {
-	return bSneaking;
+	return CurrentMovementStatus;
+}
+
+void ACharacterBase::SetMovementStatus(EMovementStatus MovementStatus)
+{
+	switch (MovementStatus)
+	{
+	case EMovementStatus::Sneack:
+		Sneak();
+		break;
+	case EMovementStatus::Walk:
+		Walk();
+		break;
+	case EMovementStatus::Run:
+		Run();
+		break;
+	case EMovementStatus::Sprint:
+		Sprint();
+		break;
+	default:
+		break;
+	}
 }
 
 bool ACharacterBase::IsDead()
@@ -351,6 +330,7 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 
 	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
 	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
+	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &ACharacterBase::StopSprinting);
 	PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
 	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);

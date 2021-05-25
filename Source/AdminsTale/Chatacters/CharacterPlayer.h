@@ -122,7 +122,7 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
 
-	//Пока таргетится ближайший противник, потом надо как-то переключатель придумать.
+	// Пока таргетится ближайший противник, потом надо как-то переключатель придумать.
 	UFUNCTION(BlueprintCallable)
 	void TargetEnemy();
 

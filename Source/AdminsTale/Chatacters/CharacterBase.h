@@ -12,6 +12,15 @@ class UHealthComponent;
 class USceneComponent;
 class AWeapon;
 
+UENUM(Blueprintable)
+enum class EMovementStatus : uint8
+{
+	Sneack,
+	Walk,
+	Run,
+	Sprint
+};
+
 UCLASS()
 class ADMINSTALE_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
 {
@@ -26,6 +35,7 @@ private:
 	//Delay();
 	FTimerHandle DelayTimer;
 
+	// OnHealthEnded - Delegate delayed content
 	void DyingActionDelayed();
 
 protected:
@@ -69,16 +79,8 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SneakSpeed = 120.f;
 	
-	//State
-		
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool bRunning = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool bSprinting = false;
-	
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "States")
-	bool bSneaking = false;
+	// Movement state
+	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
 
 	// Combat
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
@@ -94,6 +96,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	float DamageMultiplier = 1;
 
+	// Для всякого AI и BT
 	UPROPERTY(BlueprintReadWrite)
 	AActor* Target = nullptr;
 
@@ -112,12 +115,16 @@ protected:
 	virtual void TurnRate(float AxisValue);
 	
 	virtual void Jump() override;
-	
+
 	void Run();
 	
 	void Sprint();
+
+	void StopSprinting();
 	
 	void Sneak();
+
+	void Walk();
 
 	//Combat Mode
 	UFUNCTION()
@@ -157,9 +164,14 @@ public:
 	// Коэффициент используется в расчёте наносимого урона в оружии.
 	float CalculateDamageMultiplier();
 
-	UFUNCTION(BlueprintCallable)
-	bool IsSneaking();
+	//UFUNCTION(BlueprintCallable)
+	//bool IsSneaking();
 
+	UFUNCTION(BlueprintCallable, BlueprintPure)
+	EMovementStatus GetMovementStatus() const;
+
+	UFUNCTION(BlueprintCallable)
+	void SetMovementStatus(EMovementStatus MovementStatus);
 
 	UFUNCTION(BlueprintCallable)
 	bool IsDead();

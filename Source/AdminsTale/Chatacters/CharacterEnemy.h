@@ -15,19 +15,19 @@ class ADMINSTALE_API ACharacterEnemy : public ACharacterBase
 {
 	GENERATED_BODY()
 	
-
 public:
 	
 	ACharacterEnemy();
 
 private:
 
+	// Set character rotation to targeted Actor.
 	UFUNCTION()
 	void SetTarget(AActor* TargetActor);
 
 protected:
 
-	// Called when the game starts or when spawned
+	// Called when the game starts or when spawned.
 	virtual void BeginPlay() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
@@ -36,6 +36,7 @@ protected:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
 	UWidgetComponent* BattleText = nullptr;
 
+	// Is Character targeted by enemy.
 	bool bTargeted = false;
 
 	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator,

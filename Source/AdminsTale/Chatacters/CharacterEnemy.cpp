@@ -18,9 +18,10 @@ ACharacterEnemy::ACharacterEnemy()
 	RunSpeed = 350.f;
 	WalkSpeed = 150.f;
 	SneakSpeed = 150.f;
-	bRunning = false;
-	bSprinting = false;
-	bSneaking = false;
+	//bRunning = false;
+	//bSprinting = false;
+	//bSneaking = false;
+	CurrentMovementStatus = EMovementStatus::Walk;
 	bCombatMode = false;
 	bTargeted = false;
 
@@ -51,6 +52,8 @@ void ACharacterEnemy::SetTarget(AActor* TargetActor)
 void ACharacterEnemy::BeginPlay()
 {
 	Super::BeginPlay();
+
+	SetMovementStatus(EMovementStatus::Walk);
 }
 
 float ACharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)

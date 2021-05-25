@@ -34,9 +34,11 @@ ACharacterPlayer::ACharacterPlayer()
 	RunSpeed = 350.f;
 	WalkSpeed = 150.f;
 	SneakSpeed = 150.f;
-	bRunning = false;
-	bSprinting = false;
-	bSneaking = false;
+	//bRunning = false;
+	//bSprinting = false;
+	//bSneaking = false;
+	// Вот тебе и первый косяк - поставишь здесь Run - и при вызове функции Run() пошучишь ходьбу.
+	CurrentMovementStatus = EMovementStatus::Walk;
 	bTargetMode = false;
 	bCombatMode = false;
 
@@ -328,8 +330,11 @@ void ACharacterPlayer::BeginPlay()
 	Super::BeginPlay();
 	
 	//По умолчанию - бежим. А то медленно он ходит. Бесит.
-	bRunning = true;
-	GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
+	
+	SetMovementStatus(EMovementStatus::Run);
+	
+	//bRunning = true;
+	//GetCharacterMovement()->MaxWalkSpeed = RunSpeed;
 
 	//MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
 	////Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
@@ -421,5 +426,4 @@ void ACharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputCom
 
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Pressed, this, &ACharacterPlayer::TargetEnemy);
 	PlayerInputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Released, this, &ACharacterPlayer::StopTargetingEnemy);
-	
 }

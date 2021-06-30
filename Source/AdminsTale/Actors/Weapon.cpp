@@ -174,7 +174,6 @@ void AWeapon::DealDamage()
 		{
 			// Это событие нанесения урона - по идее, здесь должен быть ApplyDamage...
 			// И надо бы заморочиться с DamageType. Хотя бы парочку для начала сделать - физ урон и хилка.
-			//UGameplayStatics::ApplyDamage(DamageTarget.GetActor(), Damage, OwnerController, this, nullptr);
 			if (DamageType)
 			{
 				float Damage = CalculateDamage(Cast<ACharacterBase>(WeaponOwner)->CalculateDamageMultiplier());

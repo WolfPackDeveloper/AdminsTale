@@ -119,6 +119,13 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+
+
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
+	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;
+
+public:
+	
 	UFUNCTION(BlueprintCallable)
 	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
 
@@ -129,11 +136,6 @@ protected:
 	UFUNCTION(BlueprintCallable)
 	void StopTargetingEnemy();
 
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
-	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;
-
-public:
-	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -12,7 +12,7 @@ class UHealthComponent;
 class USceneComponent;
 class AWeapon;
 
-UENUM(Blueprintable)
+UENUM()
 enum class EMovementStatus : uint8
 {
 	Sneack,
@@ -83,13 +83,13 @@ protected:
 	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
 
 	// Combat
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
-	bool bInBattle = false;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	bool bInCombat = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	bool bCombatMode = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Battle")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	bool bIsDead = false;
 
 	// Damage Dealing
@@ -101,30 +101,53 @@ protected:
 	AActor* Target = nullptr;
 
 
+
+
+	// Health
+	// Delegate
+	void OnHealthEnded();
+	//Delegate content
+	UFUNCTION(BlueprintCallable)
+	void DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
+
+public:	
+
+	//Переопределение метода интерфейса
+	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
+	
+	// Коэффициент используется в расчёте наносимого урона в оружии.
+	float CalculateDamageMultiplier();
+
+	//UFUNCTION(BlueprintCallable)
+	//bool IsSneaking();
+
 	// ==========
 	// FUNCTIONS
 	// ==========
 
 	//Movement
 	virtual void MoveForvard(float AxisValue);
-	
+
 	virtual void MoveRight(float AxisValue);
-	
+
 	virtual void LookUpRate(float AxisValue);
-	
+
 	virtual void TurnRate(float AxisValue);
-	
+
 	virtual void Jump() override;
 
-	void Run();
-	
-	void Sprint();
+	virtual void Run();
 
-	void StopSprinting();
-	
-	void Sneak();
+	virtual void Sprint();
 
-	void Walk();
+	virtual void StopSprinting();
+
+	virtual void Sneak();
+
+	virtual void Walk();
+
+	//Other
+	virtual void Action();
 
 	//Combat Mode
 	UFUNCTION()
@@ -132,7 +155,7 @@ protected:
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetCombatMode();
-	
+
 	void SetCombatMode_Implementation();
 
 	//Attacking
@@ -145,27 +168,6 @@ protected:
 	void AttackStrong();
 
 	void AttackStrong_Implementation();
-
-	// Health
-	// Delegate
-	void OnHealthEnded();
-	//Delegate content
-	UFUNCTION(BlueprintCallable)
-	void DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
-
-	//Other
-	void Action();
-
-public:	
-
-	//Переопределение метода интерфейса
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
-	// Коэффициент используется в расчёте наносимого урона в оружии.
-	float CalculateDamageMultiplier();
-
-	//UFUNCTION(BlueprintCallable)
-	//bool IsSneaking();
 
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	EMovementStatus GetMovementStatus() const;

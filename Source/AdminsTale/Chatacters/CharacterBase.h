@@ -12,6 +12,8 @@ class UHealthComponent;
 class USceneComponent;
 class AWeapon;
 
+class UAnimMontage;
+
 UENUM()
 enum class EMovementStatus : uint8
 {
@@ -39,10 +41,16 @@ private:
 	void DyingActionDelayed();
 
 protected:
-	// Called when the game starts or when spawned
-	virtual void BeginPlay() override;
+	
+	float TargetRange = 1000.f;
 
-	//PROPERTIES
+	float TargetRadius = 300.f;
+
+	bool bTargetMode = false;
+	
+	// Movement state
+	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
+
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
 	UAbilitySystemComponent* AbilitySystemComponent = nullptr;
 
@@ -79,9 +87,6 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SneakSpeed = 120.f;
 	
-	// Movement state
-	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
-
 	// Combat
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
 	bool bInCombat = false;
@@ -94,36 +99,36 @@ protected:
 
 	// Damage Dealing
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
-	float DamageMultiplier = 1;
+	float DamageMultiplier = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float FastAttackDamageMultiplier = 1.f;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	float StrongAttackDamageMultiplier = 1.5f;
+
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
 
 	// Для всякого AI и BT
 	UPROPERTY(BlueprintReadWrite)
 	AActor* Target = nullptr;
 
-
-
+	// Combat
+	UFUNCTION(BlueprintCallable)
+	void MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
 
 	// Health
 	// Delegate
 	void OnHealthEnded();
 	//Delegate content
 	UFUNCTION(BlueprintCallable)
-	void DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
+	void DyingAction(UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
 
 public:	
 
 	//Переопределение метода интерфейса
 	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
-	
-	// Коэффициент используется в расчёте наносимого урона в оружии.
-	float CalculateDamageMultiplier();
-
-	//UFUNCTION(BlueprintCallable)
-	//bool IsSneaking();
-
-	// ==========
-	// FUNCTIONS
-	// ==========
 
 	//Movement
 	virtual void MoveForvard(float AxisValue);
@@ -146,35 +151,47 @@ public:
 
 	virtual void Walk();
 
-	//Other
+	UFUNCTION(BlueprintCallable)
+	virtual void MakeRoll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Roll();
+	virtual void Roll_Implementation();
+
+
+	// Other
 	virtual void Action();
 
-	//Combat Mode
-	UFUNCTION()
-	void EnableCombatMode(bool bEnable);
+	// Combat
+	// Коэффициент используется в расчёте наносимого урона в оружии.
+	float CalculateDamageMultiplier();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void SetCombatMode();
+	virtual void SetCombatMode_Implementation();
 
-	void SetCombatMode_Implementation();
-
-	//Attacking
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackFast();
-
-	void AttackFast_Implementation();
+	virtual void AttackFast_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackStrong();
+	virtual void AttackStrong_Implementation();
 
-	void AttackStrong_Implementation();
+	UFUNCTION(BlueprintCallable)
+	virtual void TargetEnemy();
 
+	UFUNCTION(BlueprintCallable)
+	virtual void StopTargetingEnemy();
+
+	// Movement
 	UFUNCTION(BlueprintCallable, BlueprintPure)
 	EMovementStatus GetMovementStatus() const;
 
 	UFUNCTION(BlueprintCallable)
 	void SetMovementStatus(EMovementStatus MovementStatus);
 
+	// Other
 	UFUNCTION(BlueprintCallable)
 	bool IsDead();
 

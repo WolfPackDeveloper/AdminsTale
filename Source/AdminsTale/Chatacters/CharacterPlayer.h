@@ -4,12 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "AdminsTale/Chatacters/CharacterBase.h"
-#include "Components/TimelineComponent.h"
+//#include "Components/TimelineComponent.h"
 
 #include "CharacterPlayer.generated.h"
 
-// Вот это говно не работает без include! Почему?!
-//class FOnTimelineVector;
+struct FOnTimelineVector;
 class USpringArmComponent;
 class UCameraComponent;
 //class UCurveVector;
@@ -18,7 +17,6 @@ class USceneComponent;
 //class UAnimMontage;
 
 class ACharacterEnemy;
-//class AWeapon;
 
 UCLASS()
 class ADMINSTALE_API ACharacterPlayer : public ACharacterBase
@@ -28,9 +26,6 @@ class ADMINSTALE_API ACharacterPlayer : public ACharacterBase
 public:
 
 	ACharacterPlayer();
-	
-	//Переопределение метода интерфейса
-	//virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* SpringArm;
@@ -39,18 +34,12 @@ public:
 
 private:
 
-	//UPROPERTY(EditDefaultsOnly)
-	//TSubclassOf<AWeapon> WeaponClass;
-
 	// Не уверен, надо ли именно так... В целом, решение - говно...
 	TSubclassOf<ACharacterEnemy> EnemyBaseClass;
 	
-	//UPROPERTY()
-	//ACharacterEnemy* TargetedEnemy = nullptr;
-
-	float TargetRange = 1000.f;
-	float TargetRadius = 300.f;
-	bool bTargetMode = false;
+	//float TargetRange = 1000.f;
+	//float TargetRadius = 300.f;
+	//bool bTargetMode = false;
 	
 	UPROPERTY(EditAnywhere, Category = "SpringArm")
 	float saDefaultLength = 450.f;
@@ -89,17 +78,7 @@ private:
 	void SimpleTargetLoking();
 	void AdvancedTargetLocking(float DeltaTime);
 
-
 protected:
-		
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	//USceneComponent* MeleeWeaponUnarmed = nullptr;
-	//
-	//UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
-	//USceneComponent* MeleeWeaponArmed = nullptr;
-
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	//AWeapon* MeleeWeapon;
 
 	UPROPERTY(BlueprintReadOnly)
 	ACharacterEnemy* TargetedEnemy = nullptr;
@@ -119,22 +98,20 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
-
-
 	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
 	//UAbilitySystemComponent* AbilitySystemComponent = nullptr;
 
 public:
 	
-	UFUNCTION(BlueprintCallable)
-	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
+	//UFUNCTION(BlueprintCallable)
+	virtual void MakeRoll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName) override;
 
 	// Пока таргетится ближайший противник, потом надо как-то переключатель придумать.
-	UFUNCTION(BlueprintCallable)
-	void TargetEnemy();
+	//UFUNCTION(BlueprintCallable)
+	virtual void TargetEnemy() override;
 
-	UFUNCTION(BlueprintCallable)
-	void StopTargetingEnemy();
+	//UFUNCTION(BlueprintCallable)
+	virtual void StopTargetingEnemy() override;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

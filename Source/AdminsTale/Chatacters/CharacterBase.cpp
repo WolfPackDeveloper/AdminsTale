@@ -193,14 +193,23 @@ void ACharacterBase::Walk()
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 }
 
-void ACharacterBase::EnableCombatMode(bool bEnable)
+void ACharacterBase::MakeRoll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)
 {
-	bCombatMode = bEnable;
+
 }
+
+void ACharacterBase::Roll_Implementation()
+{
+}
+
+//void ACharacterBase::EnableCombatMode(bool bEnable)
+//{
+//	bCombatMode = bEnable;
+//}
 
 void ACharacterBase::SetCombatMode_Implementation()
 {
-	EnableCombatMode(!(bCombatMode));
+	bCombatMode = !bCombatMode;
 }
 
 void ACharacterBase::AttackFast_Implementation()
@@ -209,6 +218,8 @@ void ACharacterBase::AttackFast_Implementation()
 	{
 		bCombatMode = true;
 	}
+
+	DamageMultiplier = FastAttackDamageMultiplier;
 }
 
 void ACharacterBase::AttackStrong_Implementation()
@@ -217,6 +228,63 @@ void ACharacterBase::AttackStrong_Implementation()
 	{
 		bCombatMode = true;
 	}
+
+	DamageMultiplier = StrongAttackDamageMultiplier;
+}
+
+//void ACharacterBase::SetCombatMode()
+//{
+//}
+//
+//void ACharacterBase::AttackFast()
+//{
+//}
+//
+//void ACharacterBase::AttackStrong()
+//{
+//}
+
+void ACharacterBase::TargetEnemy()
+{
+}
+
+void ACharacterBase::StopTargetingEnemy()
+{
+}
+
+void ACharacterBase::MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection)
+{
+	if (!IsValid(MeleeWeapon)) return;
+
+	// Для чара костыль - SetCapsuleRadius = 70.f.
+	// Это позволяет не бить мимо цели, если персонаж стоит слишком близко к нему.
+	// TODO: Истребить костыль капсулы.
+	//GetCapsuleComponent()->SetCapsuleRadius(70.f);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance->IsAnyMontagePlaying())
+	{
+		//if (AnimInstance->Montage_IsPlaying(AnimMontage))
+		//{
+		//	return;
+		//}
+		
+		// Вопрос - а какие анимации можно "перепрыгнуть", а какие стоит играть до конца?!
+
+		return;
+	}
+
+	DamageMultiplier = AttackDamageMultiplier;
+
+	if (!bCombatMode)
+	{
+		bCombatMode = true;
+		MeleeWeapon->AttachToComponent(MeleeWeaponArmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+
+
+	PlayAnimMontage(AnimMontage,PlayRate, StartSection);
 }
 
 void ACharacterBase::OnHealthEnded()
@@ -320,25 +388,25 @@ void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputCompo
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 
-	PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
-	PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
+	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
+	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
 
-	PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
-	PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
-	PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterBase::LookUpRate);
-	PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterBase::TurnRate);
+	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
+	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
+	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterBase::LookUpRate);
+	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterBase::TurnRate);
 
-	PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
-	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
-	PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &ACharacterBase::StopSprinting);
-	PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
-	PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
-	
-	PlayerInputComponent->BindAction(TEXT ("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
-	
-	PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
-	PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
-	PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
+	//PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
+	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
+	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &ACharacterBase::StopSprinting);
+	//PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
+	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
+	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
+	//
+	//PlayerInputComponent->BindAction(TEXT ("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
+	//
+	//PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
+	//PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
+	//PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
 
 }

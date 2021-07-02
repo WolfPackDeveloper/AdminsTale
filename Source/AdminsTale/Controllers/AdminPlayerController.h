@@ -6,7 +6,7 @@
 #include "GameFramework/PlayerController.h"
 #include "AdminPlayerController.generated.h"
 
-class ACharacterPlayer;
+class ACharacterBase;
 class UInputComponent;
 class UAnimMontage;
 
@@ -22,7 +22,7 @@ public:
 private:
 
 	UPROPERTY()
-	ACharacterPlayer* PlayerCharacter = nullptr;
+	ACharacterBase* PlayerCharacter = nullptr;
 
 protected:
 
@@ -35,28 +35,17 @@ protected:
 
 	//Movement
 	void MoveForvard(float AxisValue);
-
 	void MoveRight(float AxisValue);
-
 	void LookUpRate(float AxisValue);
-
 	void TurnRate(float AxisValue);
-
 	void Jump();
-
 	void StopJumping();
-
 	void Run();
-
 	void Sprint();
-
 	void StopSprinting();
-
 	void Sneak();
-
 	void Walk();
-
-	void Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName);
+	void Roll();
 
 	//Other
 	void Action();

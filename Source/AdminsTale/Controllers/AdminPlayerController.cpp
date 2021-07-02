@@ -96,11 +96,11 @@ void AAdminPlayerController::Walk()
 	PlayerCharacter->Walk();
 }
 
-void AAdminPlayerController::Roll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)
+void AAdminPlayerController::Roll()
 {
 	if (!IsValid(PlayerCharacter)) return;
 
-	PlayerCharacter->Roll(RollAnimMontage, RollPlayRate, RollSectionName);
+	PlayerCharacter->Roll();
 }
 
 void AAdminPlayerController::Action()
@@ -149,28 +149,29 @@ void AAdminPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
-	//InputComponent->BindAxis(TEXT("MoveForward"), this, &AAdminPlayerController::MoveForvard);
-	//InputComponent->BindAxis(TEXT("MoveRight"), this, &AAdminPlayerController::MoveRight);
+	InputComponent->BindAxis(TEXT("MoveForward"), this, &AAdminPlayerController::MoveForvard);
+	InputComponent->BindAxis(TEXT("MoveRight"), this, &AAdminPlayerController::MoveRight);
 
-	//InputComponent->BindAxis(TEXT("LookUp"), this, &APlayerController::AddPitchInput);
-	//InputComponent->BindAxis(TEXT("Turn"), this, &APlayerController::AddYawInput);
-	//InputComponent->BindAxis(TEXT("LookUpRate"), this, &AAdminPlayerController::LookUpRate);
-	//InputComponent->BindAxis(TEXT("TurnRate"), this, &AAdminPlayerController::TurnRate);
+	InputComponent->BindAxis(TEXT("LookUp"), this, &APlayerController::AddPitchInput);
+	InputComponent->BindAxis(TEXT("Turn"), this, &APlayerController::AddYawInput);
+	InputComponent->BindAxis(TEXT("LookUpRate"), this, &AAdminPlayerController::LookUpRate);
+	InputComponent->BindAxis(TEXT("TurnRate"), this, &AAdminPlayerController::TurnRate);
 
-	//InputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Run);
-	//InputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Sprint);
-	//InputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopSprinting);
-	//InputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Sneak);
-	//InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Jump);
-	//InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopJumping);
+	InputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Run);
+	InputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Sprint);
+	InputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopSprinting);
+	InputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Sneak);
+	InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Jump);
+	InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopJumping);
+	InputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Released, this, &AAdminPlayerController::Roll);
 
-	//InputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::SetCombatMode);
+	InputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::SetCombatMode);
 
 	// Атака не цепляется. Видимо, потому что реализация в принте. Нужно делать такую же херню, как и с чаром, только с контроллером - реализация в принте.
-	//InputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackFast);
-	//InputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackStrong);
-	//InputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Action);
+	InputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackFast);
+	InputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackStrong);
+	InputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Action);
 
-	//InputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::TargetEnemy);
-	//InputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopTargetingEnemy);
+	InputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::TargetEnemy);
+	InputComponent->BindAction(TEXT("TargetEnemy"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopTargetingEnemy);
 }

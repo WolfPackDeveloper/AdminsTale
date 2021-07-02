@@ -79,7 +79,6 @@ void AWeapon::Tick(float DeltaTime)
 	{
 		DealDamage();
 	}
-
 }
 
 UStaticMeshComponent* AWeapon::GetMesh() const

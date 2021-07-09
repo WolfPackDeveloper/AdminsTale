@@ -52,7 +52,7 @@ protected:
 
 	//Combat Mode
 	UFUNCTION()
-	void SetCombatMode();
+	void SwitchCombatMode();
 
 	//Attacking
 	UFUNCTION()

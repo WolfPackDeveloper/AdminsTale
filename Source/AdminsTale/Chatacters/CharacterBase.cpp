@@ -11,6 +11,7 @@
 #include "Components/InputComponent.h"
 #include "Components/SkeletalMeshComponent.h"
 #include "DrawDebugHelpers.h"
+#include "Engine/Engine.h" //Debug string.
 #include "TimerManager.h"
 #include "Engine/World.h"
 #include "GameFramework/CharacterMovementComponent.h"
@@ -26,7 +27,7 @@ ACharacterBase::ACharacterBase()
 	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
 	
 	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
-	
+		
 	BaseTurnRate = 70.f;
 	SprintSpeed = 500.f;
 	RunSpeed = 350.f;
@@ -46,6 +47,7 @@ ACharacterBase::ACharacterBase()
 	
 }
 
+// Включение Ragdoll`а. Вопрос - а надо ли это вообще?
 void ACharacterBase::DyingActionDelayed()
 {
 	GetWorldTimerManager().ClearTimer(DelayTimer);
@@ -60,11 +62,6 @@ void ACharacterBase::DyingActionDelayed()
 			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		}
 
-		// Какая-то ситуация! Чар оседает под себя и размазывается по полу. Ничего не помогает.
-		// Ладно, потом решим вопрос - на следующей итерации.
-		//GetMesh()->SetSimulatePhysics(true);
-		// или
-		//GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 		GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetActorTickEnabled(false);
@@ -90,6 +87,184 @@ void ACharacterBase::BeginPlay()
 	}
 
 } 
+
+void ACharacterBase::MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection)
+{
+	if (!IsValid(MeleeWeapon)) return;
+
+	// Для чара костыль - SetCapsuleRadius = 70.f.
+	// Это позволяет не бить мимо цели, если персонаж стоит слишком близко к нему.
+	// TODO: Истребить костыль капсулы.
+	//GetCapsuleComponent()->SetCapsuleRadius(70.f);
+
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	// Пока что атака не прерывает никакие анимации.
+	if (AnimInstance->IsAnyMontagePlaying())
+	{
+		return;
+	}
+
+	DamageMultiplier = AttackDamageMultiplier;
+
+	// Вынесено во внешнюю функцию.
+	//if (!bCombatMode)
+	//{
+	//	bCombatMode = true;
+	//	MeleeWeapon->AttachToComponent(MeleeWeaponArmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	//}
+
+	PlayAnimMontage(AnimMontage, PlayRate, StartSection);
+}
+
+void ACharacterBase::OnHit(bool bIsHitReaction, float PlayRate)
+{
+	if (bIsHitReaction)
+	{
+		float BlendTime = 0.2f;
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			AnimInstance->StopAllMontages(BlendTime);
+		}
+
+		FName SectionName = MontageFastAttack->GetSectionName(0);
+
+		PlayAnimMontage(MontageOnHit, OnHitPlayRate, SectionName);
+	}
+
+	if (!bCombatMode)
+	{
+		SetCombatMode(true);
+	}
+}
+
+void ACharacterBase::OnDeathEnd()
+{
+	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+	{
+		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
+		if (IsValid(MeleeWeapon))
+		{
+			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
+			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
+
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorTickEnabled(false);
+	}
+}
+
+//void ACharacterBase::OnHit(bool bIsHitReaction, UAnimMontage* AnimMontage, float PlayRate, FName StartSection)
+//{
+//	//Это добро будет по цепочке дальше.
+//	//if (!bCombatMode)
+//	//{
+//	//	bCombatMode = true;
+//	//	MeleeWeapon->AttachToComponent(MeleeWeaponArmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+//	//}
+//
+//	if (bIsHitReaction)
+//	{
+//		float BlendTime = 0.2f;
+//		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//
+//		if (AnimInstance->IsAnyMontagePlaying())
+//		{
+//			AnimInstance->StopAllMontages(BlendTime);
+//		}
+//
+//		PlayAnimMontage(AnimMontage, PlayRate, StartSection);
+//	}
+//}
+
+void ACharacterBase::EquipWeapon(bool bEquip, float PlayRate)
+{
+	if (!IsValid(MontageEquipWeapon)) return;
+
+	float BlendTime = 0.2f;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (AnimInstance->IsAnyMontagePlaying())
+	{
+		UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
+		if (CurrentMontage == MontageOnHit)
+		{
+			AnimInstance->Montage_Stop(BlendTime, CurrentMontage);
+		}
+		else
+		{
+			return;
+		}
+	}
+
+	// По идее здесь должно получаться 0 или 1.
+	if (MontageEquipWeapon->IsValidSectionIndex(bEquip))
+	{
+		PlayAnimMontage(MontageEquipWeapon, PlayRate, MontageEquipWeapon->GetSectionName(bEquip));
+	}
+	else
+	{
+		//Debug
+		GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Error section index in EquipWeaponMontage.")));
+	}	
+}
+
+void ACharacterBase::SetCombatMode(bool bEnableCombatMode)
+{
+	// Привязка оружия к сокету теперь через AnimNotify.
+	bCombatMode = bEnableCombatMode;
+
+	// Здесь может быть ещё какая-нибудь логика, доселе неизведанная.
+
+	EquipWeapon(bCombatMode, EquipWeaponPlayRate);
+}
+
+void ACharacterBase::OnHealthEnded()
+{
+
+}
+
+void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
+{
+	if (!bIsDead)
+	{
+		bIsDead = true;
+
+		// Выбираем рандомную секцию  для проигрывания.
+		int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
+		FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
+
+		// Чтобы не дёргался, если получит по рылу во время смерти.
+		if (IsValid(GetMesh()))
+		{
+			GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+		}
+
+		DetachFromControllerPendingDestroy();
+
+		// Заканчиваем все анимации
+		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
+
+			//AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
+			float BlendTime = 0.2f;
+			AnimInstance->StopAllMontages(BlendTime);
+		}
+
+		PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
+
+		// Теперь по AnimNotify.
+		//GetWorld()->GetTimerManager().SetTimer(DelayTimer, this, &ACharacterBase::DyingActionDelayed, DelayTime, false);
+
+		// Перенесено в DyingActionDelayed - мудянка, конечно. Но других вариантов, что-то не нашёл.
+	}
+}
 
 void ACharacterBase::MoveForvard(float AxisValue)
 {
@@ -202,129 +377,75 @@ void ACharacterBase::Roll_Implementation()
 {
 }
 
-//void ACharacterBase::EnableCombatMode(bool bEnable)
-//{
-//	bCombatMode = bEnable;
-//}
-
-void ACharacterBase::SetCombatMode_Implementation()
+// Triggered by AnimNotify - AttachWeapon.
+void ACharacterBase::AttachWeapon(bool bIsEquip)
 {
-	bCombatMode = !bCombatMode;
+	if (bIsEquip)
+	{
+		MeleeWeapon->AttachToComponent(MeleeWeaponArmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+	else
+	{
+		MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	}
+}
+
+void ACharacterBase::SwitchCombatMode_Implementation()
+{
+	if (!IsValid(MeleeWeapon)) return;
+	SetCombatMode(!bCombatMode);
 }
 
 void ACharacterBase::AttackFast_Implementation()
 {
 	if (!bCombatMode)
 	{
-		bCombatMode = true;
+		SetCombatMode(true);
 	}
+	
+	// Это делается внутри функции MakeAttack.
+	//DamageMultiplier = FastAttackDamageMultiplier;
 
-	DamageMultiplier = FastAttackDamageMultiplier;
+	// Если в дальнейшем будут комбо, то тут будет логика выбора секции для проигрывания.
+	
+	// ...
+
+	FName SectionName = MontageFastAttack->GetSectionName(0);
+
+	MakeAttack(FastAttackDamageMultiplier, MontageFastAttack, FastAttackPlayRate, SectionName);
 }
 
 void ACharacterBase::AttackStrong_Implementation()
 {
 	if (!bCombatMode)
 	{
-		bCombatMode = true;
+		SetCombatMode(true);
 	}
 
-	DamageMultiplier = StrongAttackDamageMultiplier;
+	// Это делается внутри функции MakeAttack.
+	//DamageMultiplier = FastAttackDamageMultiplier;
+
+	// Если в дальнейшем будут комбо, то тут будет логика выбора секции для проигрывания.
+
+	// ...
+
+	FName SectionName = MontageStrongAttack->GetSectionName(0);
+
+	MakeAttack(StrongAttackDamageMultiplier, MontageStrongAttack, StrongAttackPlayRate, SectionName);
 }
 
-//void ACharacterBase::SetCombatMode()
-//{
-//}
-//
-//void ACharacterBase::AttackFast()
-//{
-//}
-//
-//void ACharacterBase::AttackStrong()
-//{
-//}
+void ACharacterBase::Block_Implementation()
+{
+
+}
 
 void ACharacterBase::TargetEnemy()
 {
+
 }
 
 void ACharacterBase::StopTargetingEnemy()
 {
-}
-
-void ACharacterBase::MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection)
-{
-	if (!IsValid(MeleeWeapon)) return;
-
-	// Для чара костыль - SetCapsuleRadius = 70.f.
-	// Это позволяет не бить мимо цели, если персонаж стоит слишком близко к нему.
-	// TODO: Истребить костыль капсулы.
-	//GetCapsuleComponent()->SetCapsuleRadius(70.f);
-
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	if (AnimInstance->IsAnyMontagePlaying())
-	{
-		//if (AnimInstance->Montage_IsPlaying(AnimMontage))
-		//{
-		//	return;
-		//}
-		
-		// Вопрос - а какие анимации можно "перепрыгнуть", а какие стоит играть до конца?!
-
-		return;
-	}
-
-	DamageMultiplier = AttackDamageMultiplier;
-
-	if (!bCombatMode)
-	{
-		bCombatMode = true;
-		MeleeWeapon->AttachToComponent(MeleeWeaponArmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	}
-
-
-	PlayAnimMontage(AnimMontage,PlayRate, StartSection);
-}
-
-void ACharacterBase::OnHealthEnded()
-{
-	
-}
-
-void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
-{
-	if (!bIsDead)
-	{
-		bIsDead = true;
-
-		// Выбираем рандомную секцию  для проигрывания.
-		int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
-		FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
-
-		// Чтобы не дёргался, если получит по рылу во время смерти.
-		if (IsValid(GetMesh()))
-		{
-			GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
-		}
-
-		DetachFromControllerPendingDestroy();
-
-		// Заканчиваем все анимации
-		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-		if (AnimInstance->IsAnyMontagePlaying())
-		{
-			UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
-
-			AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
-		}
-
-		PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
-
-		GetWorld()->GetTimerManager().SetTimer(DelayTimer, this, &ACharacterBase::DyingActionDelayed, DelayTime, false);
-
-		// Перенесено в DyingActionDelayed - мудянка, конечно. Но других вариантов, что-то не нашёл.
-	}
 }
 
 void ACharacterBase::Action()
@@ -387,26 +508,4 @@ void ACharacterBase::Tick(float DeltaTime)
 void ACharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
-
-	//PlayerInputComponent->BindAxis(TEXT("MoveForward"), this, &ACharacterBase::MoveForvard);
-	//PlayerInputComponent->BindAxis(TEXT("MoveRight"), this, &ACharacterBase::MoveRight);
-
-	//PlayerInputComponent->BindAxis(TEXT("LookUp"), this, &APawn::AddControllerPitchInput);
-	//PlayerInputComponent->BindAxis(TEXT("Turn"), this, &APawn::AddControllerYawInput);
-	//PlayerInputComponent->BindAxis(TEXT("LookUpRate"), this, &ACharacterBase::LookUpRate);
-	//PlayerInputComponent->BindAxis(TEXT("TurnRate"), this, &ACharacterBase::TurnRate);
-
-	//PlayerInputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &ACharacterBase::Run);
-	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sprint);
-	//PlayerInputComponent->BindAction(TEXT("Sprint"), EInputEvent::IE_Released, this, &ACharacterBase::StopSprinting);
-	//PlayerInputComponent->BindAction(TEXT("Sneak"), EInputEvent::IE_Pressed, this, &ACharacterBase::Sneak);
-	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &ACharacterBase::Jump);
-	//PlayerInputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &ACharacterBase::StopJumping);
-	//
-	//PlayerInputComponent->BindAction(TEXT ("CombatMode"), EInputEvent::IE_Pressed, this, &ACharacterBase::SetCombatMode);
-	//
-	//PlayerInputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackFast);
-	//PlayerInputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &ACharacterBase::AttackStrong);
-	//PlayerInputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &ACharacterBase::Action);
-
 }

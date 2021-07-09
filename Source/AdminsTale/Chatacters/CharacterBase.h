@@ -47,6 +47,9 @@ protected:
 	float TargetRadius = 300.f;
 
 	bool bTargetMode = false;
+
+	UPROPERTY(BlueprintReadOnly)
+	bool bReactOnHit = true;
 	
 	// Movement state
 	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
@@ -69,7 +72,22 @@ protected:
 	TSubclassOf<AWeapon> WeaponClass;
 	
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Weapon")
-	AWeapon* MeleeWeapon;
+	AWeapon* MeleeWeapon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* MontageEquipWeapon = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* MontageFastAttack = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* MontageStrongAttack = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* MontageOnHit = nullptr;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	UAnimMontage* MontageOnDeath = nullptr;
 
 	//Movement
 	UPROPERTY(EditAnywhere, Category = "Movement")
@@ -87,14 +105,29 @@ protected:
 	UPROPERTY(EditAnywhere, Category = "Movement")
 	float SneakSpeed = 120.f;
 	
-	// Combat
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	bool bInCombat = false;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
+	float EquipWeaponPlayRate = 1.f;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
+	float FastAttackPlayRate = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
+	float StrongAttackPlayRate = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
+	float OnHitPlayRate = 1.f;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
+	float OnDeathPlayRate = 1.f;
+
+	// Combat
+	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	//bool bInCombat = false;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCombatMode = false;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bIsDead = false;
 
 	// Damage Dealing
@@ -116,7 +149,23 @@ protected:
 
 	// Combat
 	UFUNCTION(BlueprintCallable)
-	void MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
+	virtual void MakeAttack(float AttackDamageMultiplier, UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
+
+	UFUNCTION(BlueprintCallable)
+	//virtual void OnHit(bool bIsHitReaction, UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
+	virtual void OnHit(bool bIsHitReaction, float PlayRate);
+
+	UFUNCTION(BlueprintCallable)
+	virtual void OnDeathEnd();
+
+	//UFUNCTION(BlueprintCallable)
+	//void ChangeCombatStance(UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
+	
+	UFUNCTION()
+	void EquipWeapon(bool bEquip, float PlayRate);
+
+	UFUNCTION(BlueprintCallable)
+	void SetCombatMode(bool bEnableCombatMode);
 
 	// Health
 	// Delegate
@@ -158,7 +207,6 @@ public:
 	void Roll();
 	virtual void Roll_Implementation();
 
-
 	// Other
 	virtual void Action();
 
@@ -166,9 +214,16 @@ public:
 	// Коэффициент используется в расчёте наносимого урона в оружии.
 	float CalculateDamageMultiplier();
 
+	//UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	//void SetCombatMode();
+	//virtual void SetCombatMode_Implementation();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void AttachWeapon(bool bIsEquip);
+
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
-	void SetCombatMode();
-	virtual void SetCombatMode_Implementation();
+	void SwitchCombatMode();
+	virtual void SwitchCombatMode_Implementation();
 
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackFast();
@@ -177,6 +232,10 @@ public:
 	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
 	void AttackStrong();
 	virtual void AttackStrong_Implementation();
+
+	UFUNCTION(BlueprintNativeEvent, BlueprintCallable)
+	void Block();
+	virtual void Block_Implementation();
 
 	UFUNCTION(BlueprintCallable)
 	virtual void TargetEnemy();

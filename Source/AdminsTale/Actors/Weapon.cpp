@@ -140,22 +140,6 @@ void AWeapon::DealDamage()
 		FHitResult DamageTarget;
 
 		// C дебагом трассировки
-		//const bool bHit = UKismetSystemLibrary::SphereTraceSingle(
-		//	GetWorld(),
-		//	TraceStart,
-		//	TraceEnd,
-		//	TraceRadius,
-		//	UEngineTypes::ConvertToTraceType(ECC_Visibility),
-		//	false,
-		//	ActorsToIgnore,
-		//	EDrawDebugTrace::ForDuration,
-		//	DamageTarget,
-		//	true,
-		//	FLinearColor::Red,
-		//	FLinearColor::Green,
-		//	2.0f
-		//);
-
 		const bool bHit = UKismetSystemLibrary::SphereTraceSingle(
 			GetWorld(),
 			TraceStart,
@@ -164,10 +148,26 @@ void AWeapon::DealDamage()
 			UEngineTypes::ConvertToTraceType(ECC_Visibility),
 			false,
 			ActorsToIgnore,
-			EDrawDebugTrace::None,
+			EDrawDebugTrace::ForDuration,
 			DamageTarget,
-			true
+			true,
+			FLinearColor::Red,
+			FLinearColor::Green,
+			2.0f
 		);
+
+		//const bool bHit = UKismetSystemLibrary::SphereTraceSingle(
+		//	GetWorld(),
+		//	TraceStart,
+		//	TraceEnd,
+		//	TraceRadius,
+		//	UEngineTypes::ConvertToTraceType(ECC_Visibility),
+		//	false,
+		//	ActorsToIgnore,
+		//	EDrawDebugTrace::None,
+		//	DamageTarget,
+		//	true
+		//);
 
 		if (bHit)
 		{

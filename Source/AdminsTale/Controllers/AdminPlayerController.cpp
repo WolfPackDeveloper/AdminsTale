@@ -110,11 +110,11 @@ void AAdminPlayerController::Action()
 	PlayerCharacter->Action();
 }
 
-void AAdminPlayerController::SetCombatMode()
+void AAdminPlayerController::SwitchCombatMode()
 {
 	if (!IsValid(PlayerCharacter)) return;
 
-	PlayerCharacter->SetCombatMode();
+	PlayerCharacter->SwitchCombatMode();
 }
 
 void AAdminPlayerController::AttackFast()
@@ -165,9 +165,8 @@ void AAdminPlayerController::SetupInputComponent()
 	InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AAdminPlayerController::StopJumping);
 	InputComponent->BindAction(TEXT("Roll"), EInputEvent::IE_Released, this, &AAdminPlayerController::Roll);
 
-	InputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::SetCombatMode);
+	InputComponent->BindAction(TEXT("CombatMode"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::SwitchCombatMode);
 
-	// Атака не цепляется. Видимо, потому что реализация в принте. Нужно делать такую же херню, как и с чаром, только с контроллером - реализация в принте.
 	InputComponent->BindAction(TEXT("AttackFast"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackFast);
 	InputComponent->BindAction(TEXT("AttackStrong"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::AttackStrong);
 	InputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &AAdminPlayerController::Action);

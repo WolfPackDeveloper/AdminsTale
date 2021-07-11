@@ -35,10 +35,10 @@ public:
 private:
 
 	//Delay();
-	FTimerHandle DelayTimer;
+	//FTimerHandle DelayTimer;
 
 	// OnHealthEnded - Delegate delayed content
-	void DyingActionDelayed();
+	//void DyingActionDelayed();
 
 protected:
 	
@@ -153,10 +153,7 @@ protected:
 
 	UFUNCTION(BlueprintCallable)
 	//virtual void OnHit(bool bIsHitReaction, UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
-	virtual void OnHit(bool bIsHitReaction, float PlayRate);
-
-	UFUNCTION(BlueprintCallable)
-	virtual void OnDeathEnd();
+	virtual void OnHit(bool bIsHitReaction);
 
 	//UFUNCTION(BlueprintCallable)
 	//void ChangeCombatStance(UAnimMontage* AnimMontage, float PlayRate, FName StartSection);
@@ -171,8 +168,14 @@ protected:
 	// Delegate
 	void OnHealthEnded();
 	//Delegate content
+	//UFUNCTION(BlueprintCallable)
+	//void DyingAction(UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
+
 	UFUNCTION(BlueprintCallable)
-	void DyingAction(UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
+	virtual void OnDeathStart();
+
+	UFUNCTION(BlueprintCallable)
+	virtual void OnDeathEnd();
 
 public:	
 

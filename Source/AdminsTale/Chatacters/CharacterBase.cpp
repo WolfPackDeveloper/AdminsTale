@@ -48,25 +48,25 @@ ACharacterBase::ACharacterBase()
 }
 
 // Включение Ragdoll`а. Вопрос - а надо ли это вообще?
-void ACharacterBase::DyingActionDelayed()
-{
-	GetWorldTimerManager().ClearTimer(DelayTimer);
-
-	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
-	{
-		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
-		if (IsValid(MeleeWeapon))
-		{
-			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
-			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		SetActorTickEnabled(false);
-	}
-}
+//void ACharacterBase::DyingActionDelayed()
+//{
+//	GetWorldTimerManager().ClearTimer(DelayTimer);
+//
+//	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+//	{
+//		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
+//		if (IsValid(MeleeWeapon))
+//		{
+//			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+//			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
+//			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//		}
+//
+//		GetMesh()->SetAllBodiesSimulatePhysics(true);
+//		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+//		SetActorTickEnabled(false);
+//	}
+//}
 
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
@@ -117,7 +117,7 @@ void ACharacterBase::MakeAttack(float AttackDamageMultiplier, UAnimMontage* Anim
 	PlayAnimMontage(AnimMontage, PlayRate, StartSection);
 }
 
-void ACharacterBase::OnHit(bool bIsHitReaction, float PlayRate)
+void ACharacterBase::OnHit(bool bIsHitReaction)
 {
 	if (bIsHitReaction)
 	{
@@ -137,24 +137,6 @@ void ACharacterBase::OnHit(bool bIsHitReaction, float PlayRate)
 	if (!bCombatMode)
 	{
 		SetCombatMode(true);
-	}
-}
-
-void ACharacterBase::OnDeathEnd()
-{
-	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
-	{
-		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
-		if (IsValid(MeleeWeapon))
-		{
-			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
-			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		}
-
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
-		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-		SetActorTickEnabled(false);
 	}
 }
 
@@ -228,15 +210,51 @@ void ACharacterBase::OnHealthEnded()
 
 }
 
-void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
+//void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRate, float DelayTime)
+//{
+//	if (!bIsDead)
+//	{
+//		bIsDead = true;
+//
+//		// Выбираем рандомную секцию  для проигрывания.
+//		int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
+//		FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
+//
+//		// Чтобы не дёргался, если получит по рылу во время смерти.
+//		if (IsValid(GetMesh()))
+//		{
+//			GetMesh()->SetCollisionEnabled(ECollisionEnabled::PhysicsOnly);
+//		}
+//
+//		DetachFromControllerPendingDestroy();
+//
+//		// Заканчиваем все анимации
+//		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+//		if (AnimInstance->IsAnyMontagePlaying())
+//		{
+//			//UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
+//
+//			//AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
+//			float BlendTime = 0.2f;
+//			AnimInstance->StopAllMontages(BlendTime);
+//		}
+//
+//		PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
+//
+//		// Теперь по AnimNotify. Нахрен всякие там Delay.
+//		//GetWorld()->GetTimerManager().SetTimer(DelayTimer, this, &ACharacterBase::DyingActionDelayed, DelayTime, false);
+//	}
+//}
+
+void ACharacterBase::OnDeathStart()
 {
 	if (!bIsDead)
 	{
 		bIsDead = true;
 
-		// Выбираем рандомную секцию  для проигрывания.
-		int32 AnimCount = AnimMontage->CompositeSections.Num() - 1;
-		FName SectionName = AnimMontage->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
+		// Выбираем рандомную секцию  для проигрывания. Подразумевается, что анимакция помирания не одна и выбирается рандомно.
+		int32 AnimCount = MontageOnDeath->CompositeSections.Num() - 1;
+		FName SectionName = MontageOnDeath->GetAnimCompositeSection(FMath::RandRange(0, AnimCount)).SectionName;
 
 		// Чтобы не дёргался, если получит по рылу во время смерти.
 		if (IsValid(GetMesh()))
@@ -250,19 +268,33 @@ void ACharacterBase::DyingAction(class UAnimMontage* AnimMontage, float InPlayRa
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance->IsAnyMontagePlaying())
 		{
-			UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
+			//UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
 
 			//AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
 			float BlendTime = 0.2f;
 			AnimInstance->StopAllMontages(BlendTime);
 		}
 
-		PlayAnimMontage(AnimMontage, InPlayRate, SectionName);
+		PlayAnimMontage(MontageOnDeath, OnDeathPlayRate, SectionName);
+	}
+}
 
-		// Теперь по AnimNotify.
-		//GetWorld()->GetTimerManager().SetTimer(DelayTimer, this, &ACharacterBase::DyingActionDelayed, DelayTime, false);
+void ACharacterBase::OnDeathEnd()
+{
+	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+	{
+		// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
+		if (IsValid(MeleeWeapon))
+		{
+			MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+			MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
+			MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		}
 
-		// Перенесено в DyingActionDelayed - мудянка, конечно. Но других вариантов, что-то не нашёл.
+		// А если выключить этот кривой Ragdoll?
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorTickEnabled(false);
 	}
 }
 

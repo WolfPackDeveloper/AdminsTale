@@ -68,6 +68,27 @@ ACharacterBase::ACharacterBase()
 //	}
 //}
 
+void ACharacterBase::SpawnWeapon()
+{
+	if (!IsValid(GetWorld()))
+	{
+		return;
+	}
+	
+	MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+	
+	if (IsValid(MeleeWeapon))
+	{
+		//MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+		// Хмм, а есть привязка без физики?!
+		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+		MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, AttachmentRules);
+		
+		// Под вопросом
+		MeleeWeapon->SetOwner(this);
+	}
+}
+
 // Called when the game starts or when spawned
 void ACharacterBase::BeginPlay()
 {
@@ -75,10 +96,14 @@ void ACharacterBase::BeginPlay()
 
 	GetCharacterMovement()->MaxWalkSpeed = WalkSpeed;
 
-	MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
-	//Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
-	MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
-	MeleeWeapon->SetOwner(this);
+
+	// Вынесено в отдельную функцию.
+	//MeleeWeapon = GetWorld()->SpawnActor<AWeapon>(WeaponClass);
+	////Собацкая палка отправляла меня в космос! Потому что коллизии и фантомные силы...
+	//MeleeWeapon->AttachToComponent(MeleeWeaponUnarmed, FAttachmentTransformRules::SnapToTargetNotIncludingScale);
+	//MeleeWeapon->SetOwner(this);
+
+	SpawnWeapon();
 
 	// Привязка делегата.
 	if (Health)
@@ -432,7 +457,8 @@ void ACharacterBase::AttackFast_Implementation()
 {
 	if (!bCombatMode)
 	{
-		SetCombatMode(true);
+		SwitchCombatMode();
+		//SetCombatMode(true);
 	}
 	
 	// Это делается внутри функции MakeAttack.
@@ -451,7 +477,8 @@ void ACharacterBase::AttackStrong_Implementation()
 {
 	if (!bCombatMode)
 	{
-		SetCombatMode(true);
+		SwitchCombatMode();
+		//SetCombatMode(true);
 	}
 
 	// Это делается внутри функции MakeAttack.

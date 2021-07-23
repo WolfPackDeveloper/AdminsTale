@@ -14,8 +14,6 @@ UHealthComponent::UHealthComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	MaxHealth = 100.f;
-	Health = MaxHealth;
 }
 
 
@@ -24,12 +22,14 @@ void UHealthComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	//Так. Начинаем возню с делегатам...
-	AActor* HealthOwner = GetOwner();
+	Health = MaxHealth;
 
-	if (HealthOwner)
+	//Так. Начинаем возню с делегатам...
+	AActor* Owner = GetOwner();
+
+	if (Owner)
 	{
-		HealthOwner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::TakeDamage);
+		Owner->OnTakeAnyDamage.AddDynamic(this, &UHealthComponent::TakeDamage);
 	}
 }
 
@@ -45,7 +45,7 @@ void UHealthComponent::TakeDamage(AActor* DamagedActor, float Damage, const UDam
 			Health = FMath::Clamp(Health - FinalDamage, 0.f, MaxHealth);
 		}
 		
-		if (Health <= 0.f)
+		if (FMath::IsNearlyZero(Health))
 		{
 			OnHealthEnded.Broadcast();
 		}

@@ -29,6 +29,7 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	USpringArmComponent* SpringArm;
+	
 	UPROPERTY(EditAnywhere, Category = "Camera")
 	UCameraComponent* Camera;
 
@@ -103,6 +104,10 @@ protected:
 
 public:
 	
+	//Debug. Может поможет с камерой, как в Darksiders. Получение вектора направления по-другому.
+	UFUNCTION(BlueprintCallable)
+	void TraceForwardAndVelocity();
+
 	//UFUNCTION(BlueprintCallable)
 	virtual void MakeRoll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName) override;
 

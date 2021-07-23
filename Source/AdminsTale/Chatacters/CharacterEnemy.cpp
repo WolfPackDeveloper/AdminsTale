@@ -56,30 +56,21 @@ void ACharacterEnemy::BeginPlay()
 	SetMovementStatus(EMovementStatus::Walk);
 }
 
-float ACharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
-{
-	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
-
-	// Заканчиваем все анимации
-	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	//if (AnimInstance->IsAnyMontagePlaying())
-	//{
-	//	UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
-
-	//	AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
-	//}
-
-	// Поворачиваемся в сторону чего - контроллера или актёра, нанесшего урон?
-	AActor* Enemy = EventInstigator->GetPawn();
-	if (Target != Enemy)
-	{
-		Target = Enemy;
-		// Сюда было бы неплохо запихнуть какой-нибудь разворот, или интерполяцию
-		SetTarget(Enemy);
-	}
-	
-	return DamageAmount;
-}
+//float ACharacterEnemy::TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+//{
+//	Super::TakeDamage(DamageAmount, DamageEvent, EventInstigator, DamageCauser);
+//
+//	// Поворачиваемся в сторону чего - контроллера или актёра, нанесшего урон?
+//	AActor* Enemy = EventInstigator->GetPawn();
+//	if (Target != Enemy)
+//	{
+//		Target = Enemy;
+//		// Сюда было бы неплохо запихнуть какой-нибудь разворот, или интерполяцию
+//		SetTarget(Enemy);
+//	}
+//	
+//	return DamageAmount;
+//}
 
 void ACharacterEnemy::Tick(float DeltaTime)
 {

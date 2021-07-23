@@ -149,9 +149,16 @@ void AAdminPlayerController::SetupInputComponent()
 {
 	Super::SetupInputComponent();
 
+	// Как бы проверить валидность Player`a? А надо ли?
+	//InputComponent->BindAxis(TEXT("MoveForward"), PlayerCharacter, &ACharacterBase::MoveForvard);
+	//InputComponent->BindAxis(TEXT("MoveRight"), PlayerCharacter, &ACharacterBase::MoveRight);
+	//InputComponent->BindAxis(TEXT("LookUp"), this, &APlayerController::AddPitchInput);
+	//InputComponent->BindAxis(TEXT("Turn"), this, &APlayerController::AddYawInput);
+	//InputComponent->BindAxis(TEXT("LookUpRate"), PlayerCharacter, &ACharacterBase::LookUpRate);
+	//InputComponent->BindAxis(TEXT("TurnRate"), PlayerCharacter, &ACharacterBase::TurnRate);
+	
 	InputComponent->BindAxis(TEXT("MoveForward"), this, &AAdminPlayerController::MoveForvard);
 	InputComponent->BindAxis(TEXT("MoveRight"), this, &AAdminPlayerController::MoveRight);
-
 	InputComponent->BindAxis(TEXT("LookUp"), this, &APlayerController::AddPitchInput);
 	InputComponent->BindAxis(TEXT("Turn"), this, &APlayerController::AddYawInput);
 	InputComponent->BindAxis(TEXT("LookUpRate"), this, &AAdminPlayerController::LookUpRate);

@@ -40,6 +40,8 @@ private:
 	// OnHealthEnded - Delegate delayed content
 	//void DyingActionDelayed();
 
+	void SpawnWeapon();
+
 protected:
 	
 	float TargetRange = 1000.f;

@@ -39,14 +39,13 @@ protected:
 	// Is Character targeted by enemy.
 	bool bTargeted = false;
 
-	virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator,
-	AActor* DamageCauser) override;
-
+	//virtual float TakeDamage(float DamageAmount, FDamageEvent const& DamageEvent, class AController* EventInstigator, AActor* DamageCauser) override;
 
 public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	// Делаем видимый HealthBar и метку.
 	UFUNCTION(BlueprintCallable)
 	void SetTargetedState(bool TargetState);
 

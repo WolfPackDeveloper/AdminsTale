@@ -17,6 +17,7 @@
 #include "GameFramework/SpringArmComponent.h"
 #include "Kismet/GameplayStatics.h"
 #include "Kismet/KismetMathLibrary.h"
+//#include "Kismet/KismetSystemLibrary.h" // Debug всякое. Хммм. А можно же просто из неё вызывать. Схема то компиляции заголовочников позволяет.)
 #include "Math/UnrealMathUtility.h"
 
 
@@ -353,6 +354,47 @@ void ACharacterPlayer::BeginPlay()
 
 }
 
+void ACharacterPlayer::TraceForwardAndVelocity()
+{
+	// Для оптимизации - если никуда не двигаешься, то и считать ничего не надо.
+	if (GetVelocity().IsZero())
+	{
+		return;
+	}
+	
+	float TraceLength = 300.f;
+	float ArrowSize = 7.f;
+	float TraceLineThickness = 5.f;
+	float Duration = 0.f;
+	FVector TraceStart = GetActorLocation();
+	FVector ForwardEnd = TraceStart + GetActorForwardVector() * TraceLength;
+	FVector VelocityNormal = GetVelocity().GetSafeNormal();
+
+	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Normalized Velocity: %s"), *VelocityNormal.ToString()));
+
+	FVector VelocityEnd = TraceStart + VelocityNormal * TraceLength;
+
+	UKismetSystemLibrary::DrawDebugArrow(GetWorld(), TraceStart, ForwardEnd, ArrowSize, FLinearColor::Blue, Duration, TraceLineThickness);
+	UKismetSystemLibrary::DrawDebugArrow(GetWorld(), TraceStart, VelocityEnd, ArrowSize, FLinearColor::Red, Duration, TraceLineThickness);
+
+	// Получить угол между веторами. Вся фишка работает в данном случае, если векторы единичные. А вообще - учи линейку.
+	// Вот здесь получили произведение векторов = скалярное произведение на косинус между ними. Так как векторы единичные, то получили косинус угла.
+	//float Cos = UKismetMathLibrary::Dot_VectorVector(GetActorForwardVector(), VelocityNormal);
+	const float Angle = FMath::Acos(FVector::DotProduct(GetActorForwardVector(), VelocityNormal));
+	// Расчёт ортогонального вектора.
+	const FVector CrossProduct = FVector::CrossProduct(GetActorForwardVector(), VelocityNormal);
+	// Acos возвращает значение в радианах.
+	// А вообще, вот так хитро получается направление вижение для AnimBlueprint. Надо прикинуть - может поменять?
+	const float DegreeAngle = FMath::RadiansToDegrees(Angle);// * FMath::Sign(CrossProduct.Z);
+
+	// Если векторы противоположны, то будет ноль и персонаж не получит направления назад. Правится это так.
+	const float SignedDegreeAngle = CrossProduct.IsZero() ? DegreeAngle : DegreeAngle * FMath::Sign(CrossProduct.Z);
+
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("Angle between Forward and Velocity: %f"), Angle));
+	GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Direction: %f"), SignedDegreeAngle));
+
+}
+
 void ACharacterPlayer::MakeRoll(UAnimMontage* RollAnimMontage, float RollPlayRate, FName RollSectionName)
 {
 	if (!(GetCharacterMovement()->IsFalling()) && (GetCharacterMovement()->GetLastInputVector() != FVector(0.f,0.f,0.f)))
@@ -417,6 +459,8 @@ void ACharacterPlayer::Tick(float DeltaTime)
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm Location is: %s"), *SpringArm->GetComponentLocation().ToString()));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Green, FString::Printf(TEXT("SpringArm length is: %f"), SpringArm->TargetArmLength));
 	//GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Yellow, FString::Printf(TEXT("Camera Locatin (World) is: %s"), *Camera->GetComponentLocation().ToString()));
+
+	//TraceForwardAndVelocity();
 }
 
 // Called to bind functionality to input

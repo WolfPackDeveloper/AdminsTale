@@ -24,7 +24,7 @@ ACharacterBase::ACharacterBase()
 	PrimaryActorTick.bCanEverTick = true;
 
 	// GAS отложен до лучших времён...
-	AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
+	//AbilitySystemComponent = CreateDefaultSubobject<UAbilitySystemComponent>("AbilitySystemComponent");
 	
 	Health = CreateDefaultSubobject<UHealthComponent>(TEXT("Health"));
 		
@@ -512,10 +512,10 @@ void ACharacterBase::Action()
 
 }
 
-UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
-{
-	return AbilitySystemComponent;
-}
+//UAbilitySystemComponent* ACharacterBase::GetAbilitySystemComponent() const
+//{
+//	return AbilitySystemComponent;
+//}
 
 float ACharacterBase::CalculateDamageMultiplier()
 {

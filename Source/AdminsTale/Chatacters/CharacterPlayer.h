@@ -81,8 +81,13 @@ private:
 
 protected:
 
+	// Aiming
+	float AimRange = 1000.f;
+	float AimRadius = 300.f;
+	bool bAimMode = false;
+
 	UPROPERTY(BlueprintReadOnly)
-	ACharacterEnemy* TargetedEnemy = nullptr;
+	ACharacterEnemy* AimedEnemy = nullptr;
 
 	// Timeline testing ========================================================================
 

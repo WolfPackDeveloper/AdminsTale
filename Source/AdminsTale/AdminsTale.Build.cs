@@ -12,12 +12,22 @@ public class AdminsTale : ModuleRules
 
 		PrivateDependencyModuleNames.AddRange(new string[] { "GameplayAbilities", "GameplayTags", "GameplayTasks", "Slate", "SlateCore" });
 
+		PublicIncludePaths.AddRange(new string[]
+		{
+			"AdminsTale/Public/GameModes",
+			"AdminsTale/Public/Characters",
+			"AdminsTale/Public/Controllers",
+			"AdminsTale/Public/Components",
+			"AdminsTale/Public/Actors",
+			"AdminsTale/Public/Objects"
+		});
+
 		// Пути для поиска файлов проекта. Чтобы не писать полные пути в include.
 		//PublicIncludePaths.AddRange(new string[] { "" });
 
 		// Uncomment if you are using Slate UI
 		// PrivateDependencyModuleNames.AddRange(new string[] { "Slate", "SlateCore" });
-		
+
 		// Uncomment if you are using online features
 		// PrivateDependencyModuleNames.Add("OnlineSubsystem");
 

@@ -4,7 +4,6 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
-#include "AbilitySystemInterface.h"
 #include "CharacterBase.generated.h"
 
 class UAbilitySystemComponent;
@@ -24,7 +23,7 @@ enum class EMovementStatus : uint8
 };
 
 UCLASS()
-class ADMINSTALE_API ACharacterBase : public ACharacter, public IAbilitySystemInterface
+class ADMINSTALE_API ACharacterBase : public ACharacter
 {
 	GENERATED_BODY()
 
@@ -33,33 +32,18 @@ public:
 	ACharacterBase();
 
 private:
-
-	//Delay();
-	//FTimerHandle DelayTimer;
-
-	// OnHealthEnded - Delegate delayed content
-	//void DyingActionDelayed();
-
 	void SpawnWeapon();
 
 protected:
 	
-	float TargetRange = 1000.f;
 
-	float TargetRadius = 300.f;
-
-	bool bTargetMode = false;
 
 	UPROPERTY(BlueprintReadOnly)
-	bool bReactOnHit = true;
+	bool bISReactOnHit = true;
 	
 	// Movement state
 	EMovementStatus CurrentMovementStatus = EMovementStatus::Walk;
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "AbilitySystem")
-	UAbilitySystemComponent* AbilitySystemComponent = nullptr;
-
-	//Charactericstics
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Resource")
 	UHealthComponent* Health = nullptr;
 	
@@ -92,19 +76,19 @@ protected:
 	UAnimMontage* MontageOnDeath = nullptr;
 
 	//Movement
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float BaseTurnRate = 70.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SprintSpeed = 600.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float RunSpeed = 420.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float WalkSpeed = 300.f;
 	
-	UPROPERTY(EditAnywhere, Category = "Movement")
+	UPROPERTY(EditDefaultsOnly, Category = "Movement")
 	float SneakSpeed = 120.f;
 	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Combat Animation Config")
@@ -123,8 +107,6 @@ protected:
 	float OnDeathPlayRate = 1.f;
 
 	// Combat
-	//UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Combat")
-	//bool bInCombat = false;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 	bool bCombatMode = false;
@@ -169,10 +151,8 @@ protected:
 	// Health
 	// Delegate
 	void OnHealthEnded();
-	//Delegate content
-	//UFUNCTION(BlueprintCallable)
-	//void DyingAction(UAnimMontage* AnimMontage, float InPlayRate, float DelayTime);
 
+	//Delegate for OnHealthEnded
 	UFUNCTION(BlueprintCallable)
 	virtual void OnDeathStart();
 
@@ -180,9 +160,6 @@ protected:
 	virtual void OnDeathEnd();
 
 public:	
-
-	//Переопределение метода интерфейса
-	virtual UAbilitySystemComponent* GetAbilitySystemComponent() const override;
 
 	//Movement
 	virtual void MoveForvard(float AxisValue);

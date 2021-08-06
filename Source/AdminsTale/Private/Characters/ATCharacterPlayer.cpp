@@ -48,6 +48,10 @@ void AATCharacterPlayer::EnableAimRotation(bool EnableAimRotation)
 	}
 }
 
+void AATCharacterPlayer::TakeAim()
+{
+}
+
 void AATCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();

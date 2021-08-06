@@ -28,6 +28,7 @@ private:
 
 	// Может... AimComponent?
 	void SetDefaultRotationBehaviour();
+	// Нахер вообще он нужен - поставим доводку, и хорош.
 	void SetAimRotationBehaviour();
 	void EnableAimRotation(bool EnableAimRotation);
 
@@ -38,6 +39,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Camera")
 	UCameraComponent* Camera;
+	
+	// Взять в цель ближайшего по ForwardVector`у противника.
+	virtual void TakeAim() override;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;

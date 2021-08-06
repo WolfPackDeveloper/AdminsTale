@@ -40,14 +40,18 @@ private:
 	AATWeaponBase* WeaponToEquip = nullptr;
 
 	void SpawnWeapon();
-	// —рабатывает от AnimNotify и определ€ет, что куда присобачивать.
-	void ReequipWeapon(bool bReequip);
+	
+	// ¬нутренн€€ логика AttachWeapon.
+	void DrawWeapon();
+	void SheatheWeapon(bool bReequip);
+	void ReequipWeapon();
 
 protected:
 	// Called when the game starts
 	virtual void BeginPlay() override;
 
 	// Weapon
+	
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Weapon")
 	TSubclassOf<AATWeaponBase> WeaponClass;
 
@@ -60,11 +64,19 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Weapon")
 	FName RangeWeaponUnequippedSocketName = NAME_None;
 
+	// Animation
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	FName WithWeaponSectionMontageName = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	FName WithoutWeaponSectionMontageName = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	FName MeleeAttackSectionMontageName = NAME_None;
+
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	FName RangeAttackSectionMontageName = NAME_None;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* MontageEquipWeapon = nullptr;
@@ -78,23 +90,46 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	UAnimMontage* MontageRangeAttack = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
+	float MontageEquipPlayRate = 1.f;
 
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
-	float MontagePlayRate = 1.f;
+	float MontageAttackPlayRate = 1.f;
 
 public:	
 	
-	void AttachWeapon(AATWeaponBase* Weapon, FName SocketName);
+	/**
+	* EquipWeapon - triggered, when player initiates an attack, or press buttom of equipping weapon.
+	*
+	*/
+	UFUNCTION(BlueprintCallable)
+	void EquipWeapon(AATWeaponBase* Weapon);
+	//void EquipWeapon(AATWeaponBase* Weapon, bool Equip);
 
-	//void EquipRangeWeapon(bool Equip);
-
-	//void EquipMeleeWeapon(bool Equip);
-
-	void EquipWeapon(AATWeaponBase* Weapon, bool Equip);
+	/**
+	* AttachWeapon - triggered by AnimNotify while equipping or unequipping weapon.
+	*
+	*/
+	UFUNCTION(BlueprintCallable)
+	void AttachWeapon();
 
 	void MeleeAttack();
 
 	void RangeAttack();
+
+	/**
+	* IsWeaponEquipped - bool for animations.
+	*
+	*/
+	UFUNCTION(BlueprintCallable)
+	bool IsWeaponEquipped() const;
+
+	/**
+	* GetMeleeWeapon - returns pointer on melee weapon.
+	*
+	*/
+	UFUNCTION(BlueprintCallable)
+	AATWeaponBase* GetMeleeWeapon() const;
 
 	// Called every frame
 	//virtual void TickComponent(float DeltaTime, ELevelTick TickType, FActorComponentTickFunction* ThisTickFunction) override;

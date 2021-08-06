@@ -38,7 +38,9 @@ protected:
 	void MeleeAttack();
 	void RangeAttack();
 	void Dash();
-	/*void Aim();*/
+	//void Aim();
+	// For testing
+	void SheatheWeapon();
 	void Action();
 	// Keyboard only for now.
 	void Run();

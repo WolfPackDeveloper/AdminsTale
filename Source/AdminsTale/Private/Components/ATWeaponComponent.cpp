@@ -16,7 +16,6 @@ UATWeaponComponent::UATWeaponComponent()
 	// off to improve performance if you don't need them.
 	PrimaryComponentTick.bCanEverTick = false;
 
-	// ...
 }
 
 void UATWeaponComponent::SpawnWeapon()
@@ -26,15 +25,11 @@ void UATWeaponComponent::SpawnWeapon()
 		return;
 	}
 
-	//ACharacter* Character = Cast<ACharacter>(GetOwner());
-
 	if (!IsValid(Character))
 	{
 		return;
 	}
 
-	//const auto Weapon = GetWorld()->SpawnActor<AATWeaponBase>(WeaponClass);
-	
 	MeleeWeapon = GetWorld()->SpawnActor<AATWeaponBase>(WeaponClass);
 
 	if (!IsValid(MeleeWeapon))
@@ -44,47 +39,48 @@ void UATWeaponComponent::SpawnWeapon()
 
 	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 	MeleeWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, MeleeWeaponUnequippedSocketName);
+	MeleeWeapon->SetOwner(Character);
 }
 
-void UATWeaponComponent::ReequipWeapon(bool bReequip)
+void UATWeaponComponent::DrawWeapon()
 {
-	if (!IsValid(MontageEquipWeapon) || !IsValid(MontageUnequipWeapon))
+	if (WeaponEquippedSocketName != NAME_None)
 	{
-		return;
+		FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
+
+		EquippedWeapon = WeaponToEquip;
+		EquippedWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, WeaponEquippedSocketName);
 	}
 
-	if (WithWeaponSectionMontageName == NAME_None || WithoutWeaponSectionMontageName == NAME_None)
-	{
-		return;
-	}
+	WeaponToEquip = nullptr;
+	Character->PlayAnimMontage(MontageEquipWeapon, MontageEquipPlayRate, WithWeaponSectionMontageName);
+}
 
-	// 1) Если оружие не снаряжено, то вооружаемся.
-	// 2) Если оружие снаряжено, и не нужно перевооружиться - убираем оружие в ножны.
-	// 3) Если оружие снаряжено, и нужно перевооружиться.
-
-
-
-	float InBlendOutTime = 0.1f;
-	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+void UATWeaponComponent::SheatheWeapon(bool bReequip)
+{
+	FAttachmentTransformRules AttachmentRules(EAttachmentRule::SnapToTarget, false);
 	
-	// Всё правильно, монтаж играется. И мы его останавливаем, и с этого места проигрываем другой! Эврика!
-	if (AnimInstance->IsAnyMontagePlaying())
+	if (EquippedWeapon == MeleeWeapon && MeleeWeaponUnequippedSocketName != NAME_None)
 	{
-		AnimInstance->Montage_Stop(InBlendOutTime);
+		EquippedWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, MeleeWeaponUnequippedSocketName);
+	}
+	else if (EquippedWeapon == RangeWeapon && RangeWeaponUnequippedSocketName != NAME_None)
+	{
+		EquippedWeapon->AttachToComponent(Character->GetMesh(), AttachmentRules, RangeWeaponUnequippedSocketName);
 	}
 
-	// 1) PlayMontageUnequip WithWeapon;
-	AnimInstance->Montage_JumpToSection(WithWeaponSectionMontageName, MontageUnequipWeapon);
-	AnimInstance->Montage_Play(MontageUnequipWeapon, MontagePlayRate);
-	// 2) Attach CurrentWeapon to Unarmed;
-	// Дерьмо - это на AnimNotify висит...
-	// 3) Attach WeaponToEquip to Armed;
-	// Дерьмо - это на AnimNotify висит...
-	// 4) Set WeaponToAttach to CurrentWeapon;
-	// Это должно проигрываться после смеры темущего оружия...
-	// 5) PlayMontageEQuip WithWeapon;
-	AnimInstance->Montage_JumpToSection(WithWeaponSectionMontageName, MontageEquipWeapon);
-	AnimInstance->Montage_Play(MontageEquipWeapon, MontagePlayRate);
+	if (!bReequip)
+	{
+		EquippedWeapon = nullptr;
+		WeaponToEquip = nullptr;
+		Character->PlayAnimMontage(MontageUnequipWeapon, MontageEquipPlayRate, WithoutWeaponSectionMontageName);
+	}
+}
+
+void UATWeaponComponent::ReequipWeapon()
+{
+	SheatheWeapon(true);
+	DrawWeapon();
 }
 
 // Called when the game starts
@@ -97,53 +93,70 @@ void UATWeaponComponent::BeginPlay()
 	SpawnWeapon();
 }
 
-void UATWeaponComponent::AttachWeapon(AATWeaponBase* Weapon, FName SocketName)
+void UATWeaponComponent::EquipWeapon(AATWeaponBase* Weapon)
 {
+	if (!IsValid(MontageEquipWeapon) || !IsValid(MontageUnequipWeapon))
+	{
+		return;
+	}
+
+	if (WithWeaponSectionMontageName == NAME_None || WithoutWeaponSectionMontageName == NAME_None)
+	{
+		return;
+	}
+
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+
+	if (AnimInstance->IsAnyMontagePlaying())
+	{
+		return;
+	}
+
+	WeaponToEquip = Weapon;
+
+	// Не знаю насколько это адекватно - логика принятия решения о вооружении конкретным оружием.
+	// Если в руках нет оружия.
+	if (!EquippedWeapon)
+	{
+		// Мразматическая ситуация - когда не снаряжен и пытаешься вооружиться нулём (то бишь разоружиться).
+		if (EquippedWeapon == WeaponToEquip)
+		{
+			return;
+		}
+		else
+		{
+			Character->PlayAnimMontage(MontageEquipWeapon, MontageEquipPlayRate, WithoutWeaponSectionMontageName);
+		}
+	}
+	// Если уже чем-то вооружён. То начинаем разоружяться, а там видно будет (AttachWeapon).
+	else
+	{
+		Character->PlayAnimMontage(MontageUnequipWeapon, MontageEquipPlayRate, WithWeaponSectionMontageName);
+	}
 }
 
-//void UATWeaponComponent::EquipRangeWeapon(bool Equip)
-//{
-//
-//}
-//
-//void UATWeaponComponent::EquipMeleeWeapon(bool Equip)
-//{
-	//if (!IsValid(MontageEquipWeapon)) return;
-
-	//float BlendTime = 0.2f;
-	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	//if (AnimInstance->IsAnyMontagePlaying())
-	//{
-	//	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
-	//	if (CurrentMontage == MontageOnHit)
-	//	{
-	//		AnimInstance->Montage_Stop(BlendTime, CurrentMontage);
-	//	}
-	//	else
-	//	{
-	//		return;
-	//	}
-	//}
-
-	//// По идее здесь должно получаться 0 или 1.
-	//if (MontageEquipWeapon->IsValidSectionIndex(bEquip))
-	//{
-	//	PlayAnimMontage(MontageEquipWeapon, PlayRate, MontageEquipWeapon->GetSectionName(bEquip));
-	//}
-	//else
-	//{
-	//	//Debug
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Error section index in EquipWeaponMontage.")));
-	//}
-//}
-
-void UATWeaponComponent::EquipWeapon(AATWeaponBase* Weapon, bool Equip)
+void UATWeaponComponent::AttachWeapon()
 {
-
-
+	// Если не вооружён, то вооружаемся.
+	if (!IsValid(EquippedWeapon) && IsValid(WeaponToEquip))
+	{
+		DrawWeapon();
+	}
+	// Если уже чем-то вооружён, то
+	else
+	{
+		// убираем оружие
+		if (!IsValid(WeaponToEquip) && IsValid(EquippedWeapon) || EquippedWeapon == WeaponToEquip)
+		{
+			SheatheWeapon(false);
+		}
+		// или же перевооружаемся.
+		else
+		{
+			ReequipWeapon();
+		}
+	}
 }
-
 void UATWeaponComponent::MeleeAttack()
 {
 	if (!IsValid(MeleeWeapon) || !IsValid(MontageMeleeAttack))
@@ -152,31 +165,69 @@ void UATWeaponComponent::MeleeAttack()
 	}
 
 	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
-
 	// Пока что атака не прерывает никакие анимации.
 	if (AnimInstance->IsAnyMontagePlaying())
 	{
 		return;
 	}
-
-	if (EquippedWeapon)
+	// Если не вооружён, или вооружён какой-то хернёй, срочно меняем ситуацию.
+	if (EquippedWeapon != MeleeWeapon)
 	{
-		if (EquippedWeapon == RangeWeapon)
-		{
-			ReequipWeapon(MeleeWeapon);
-		}
-	}
-	else
-	{
-		EquipWeapon(MeleeWeapon, true);
+		EquipWeapon(MeleeWeapon);
+		// Пока так, а то вся красота затрётся моментальным исполнение атаки. Потом, может, что-нибудь придумаю.
+		return;
 	}
 	// Attack
-	//PlayMontage();
+	// Прицеливаемся к ближайшему врагу по вектору направления. Будет перед атакой в самом Character.
+	//Character->TurnToAim(AimCharacter - Property? - What Class?);
+	// Когда будут комбы, тут нужно сделать функцию, которая будет рассчитывать, какую секцию монтажа проигрывать.
+	// DefineComboAttackSection();
+	FName AttackSection = MeleeAttackSectionMontageName;
+	// PlayMontage
+	if (AttackSection != NAME_None)
+	{
+		Character->PlayAnimMontage(MontageMeleeAttack, MontageAttackPlayRate, AttackSection);
+	}
 }
 
 void UATWeaponComponent::RangeAttack()
 {
+	if (!IsValid(RangeWeapon) || !IsValid(MontageRangeAttack))
+	{
+		return;
+	}
 
+	UAnimInstance* AnimInstance = Character->GetMesh()->GetAnimInstance();
+	// Пока что атака не прерывает никакие анимации.
+	if (AnimInstance->IsAnyMontagePlaying())
+	{
+		return;
+	}
+	// Если не вооружён, или вооружён какой-то хернёй, срочно меняем ситуацию.
+	if (EquippedWeapon != RangeWeapon)
+	{
+		EquipWeapon(RangeWeapon);
+		// Пока так, а то вся красота затрётся моментальным исполнение атаки. Потом, может, что-нибудь придумаю.
+		return;
+	}
+	// Attack
+	// Когда будут комбы, тут нужно сделать функцию, которая будет рассчитывать, какую секцию монтажа проигрывать.
+	FName AttackSection = RangeAttackSectionMontageName;
+	// PlayMontage
+	if (AttackSection != NAME_None)
+	{
+		Character->PlayAnimMontage(MontageRangeAttack, MontageAttackPlayRate, AttackSection);
+	}
+}
+
+bool UATWeaponComponent::IsWeaponEquipped() const
+{
+	return IsValid(EquippedWeapon);
+}
+
+AATWeaponBase* UATWeaponComponent::GetMeleeWeapon() const
+{
+	return MeleeWeapon;
 }
 
 // Called every frame

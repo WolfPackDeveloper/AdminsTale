@@ -2,7 +2,7 @@
 
 
 #include "ATCharacterBase.h"
-//#include "Actors/ATWeaponBase.h"
+#include "Actors/ATWeaponBase.h"
 #include "Components/ATHealthComponent.h"
 #include "Components/ATPowerComponent.h"
 #include "Components/ATWeaponComponent.h"
@@ -10,6 +10,7 @@
 
 #include "Animation/AnimInstance.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "Kismet/GameplayStatics.h" // ApplyDamage
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -23,22 +24,34 @@ AATCharacterBase::AATCharacterBase()
 	PowerComponent = CreateDefaultSubobject<UATPowerComponent>(TEXT("PowerComponent"));
 	WeaponComponent = CreateDefaultSubobject<UATWeaponComponent>(TEXT("WeaponComponent"));
 
+	// Set CollisionProfile for implementation damage events.
+	FName MeshCollisionProfile = "Character";
+	GetMesh()->SetCollisionProfileName(MeshCollisionProfile);
 }
 
-float AATCharacterBase::CountReceivedDamage(float DamageAmount, const UAT_DamageTypeBase* DamageType)
+void AATCharacterBase::PlayOnHitMontage()
 {
-	return DamageAmount;
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+
+	if (!IsValid(AnimInstance))
+	{
+		return;
+	}
+
+	if (bCanReactOnHit)
+	{
+		if (AnimInstance->IsAnyMontagePlaying())
+		{
+			float BlendTime = 0.2f;
+			AnimInstance->StopAllMontages(BlendTime);
+		}
+
+		PlayAnimMontage(MontageOnDie, OnDiePlayRate);
+	}
 }
 
-float AATCharacterBase::CountReceivedHealing(float HealAmount)
+void AATCharacterBase::DefineDamageConsiquences(const UDamageType* DamageType, float Damage)
 {
-	return HealAmount;
-}
-
-void AATCharacterBase::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
-{
-	// PlayMontage OnTakeDamage
-
 	//TODO: Как убрать каст?
 	const UAT_DamageTypeBase* IncomingDamageType = Cast<UAT_DamageTypeBase>(DamageType);
 
@@ -50,6 +63,41 @@ void AATCharacterBase::OnTakeDamage(AActor* DamagedActor, float Damage, const UD
 	{
 		HealthComponent->Decrease(CountReceivedDamage(Damage, IncomingDamageType));
 	}
+}
+
+void AATCharacterBase::OnTakeDamage(AActor* DamagedActor, float Damage, const UDamageType* DamageType, class AController* InstigatedBy, AActor* DamageCauser)
+{
+	// Решение получать, или нет.
+	//if (bIsImmortal) return;
+	
+	// Если получать, то от кого.
+	AATCharacterBase* Attacker = Cast<AATCharacterBase>(DamageCauser);
+	ECharacterType AttakersType = Attacker->GetCharacterType();
+
+	// Если персонаж не враг народа.
+	if (CharacterType != ECharacterType::Enemy)
+	{
+		// И атака прилетела тоже не от врага народа, то не обращаем на неё внимания. Обознались, вадать.
+		if (AttakersType != ECharacterType::Enemy)
+		{
+			return;
+		}
+	}
+	// Если же ты враг народа.
+	else
+	{
+		// То ишак ишака видит издалека...
+		if (AttakersType == ECharacterType::Enemy)
+		{
+			return;
+		}
+	}
+	// Если хочется поиграться с разными воюющими друг с другом непесями, можно и усложнить через switch.
+
+	// CountDamage
+	DefineDamageConsiquences(DamageType, Damage);
+	// PlayMontage OnTakeDamage
+	PlayOnHitMontage();
 }
 
 void AATCharacterBase::OnEndHealth()
@@ -128,6 +176,33 @@ void AATCharacterBase::OnDied()
 	//}
 }
 
+float AATCharacterBase::CountReceivedDamage(float DamageAmount, const UAT_DamageTypeBase* DamageType)
+{
+	return DamageAmount;
+}
+
+float AATCharacterBase::CountReceivedHealing(float HealAmount)
+{
+	return HealAmount;
+}
+
+float AATCharacterBase::CalculateOutputDamage(const AATWeaponBase* Weapon)
+{
+	float DamageMultiplier = 1.f;
+	
+	return Weapon->GetBaseDamage() * DamageMultiplier;
+}
+
+void AATCharacterBase::TakeAim()
+{
+
+}
+
+void AATCharacterBase::TurnToAim()
+{
+
+}
+
 bool AATCharacterBase::IsMakingAction()
 {
 	if (GetMesh()->GetAnimInstance())
@@ -138,76 +213,46 @@ bool AATCharacterBase::IsMakingAction()
 	return false;
 }
 
-float AATCharacterBase::CalculateOuputDamage(float BaseDamage)
-{
-	return BaseDamage;
-}
-
 void AATCharacterBase::Jump()
 {
 	Super::Jump();
 }
-
-void AATCharacterBase::EquipWeapon()
-{
-	//if (!IsValid(MontageEquipWeapon)) return;
-
-	//float BlendTime = 0.2f;
-	//UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-
-	//if (AnimInstance->IsAnyMontagePlaying())
-	//{
-	//	UAnimMontage* CurrentMontage = AnimInstance->GetCurrentActiveMontage();
-	//	if (CurrentMontage == MontageOnHit)
-	//	{
-	//		AnimInstance->Montage_Stop(BlendTime, CurrentMontage);
-	//	}
-	//	else
-	//	{
-	//		return;
-	//	}
-	//}
-
-	//// По идее здесь должно получаться 0 или 1.
-	//if (MontageEquipWeapon->IsValidSectionIndex(bEquip))
-	//{
-	//	PlayAnimMontage(MontageEquipWeapon, PlayRate, MontageEquipWeapon->GetSectionName(bEquip));
-	//}
-	//else
-	//{
-	//	//Debug
-	//	GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Red, FString::Printf(TEXT("Error section index in EquipWeaponMontage.")));
-	//}	
-}
-
-//void AATCharacterBase::Attack()
-//{
-//
-//}
-
-//void AATCharacterBase::UsePower()
-//{
-//
-//}
 
 void AATCharacterBase::Dash()
 {
 
 }
 
-//void AATCharacterBase::Aim()
-//{
-//
-//}
-
 void AATCharacterBase::Action()
 {
 
 }
 
+void AATCharacterBase::DealDamage(const FHitResult& HitResult, const AATWeaponBase* Weapon)
+{
+	
+	AActor* DamagedActor = HitResult.GetActor();
+	if (!IsValid(DamagedActor))
+	{
+		return;
+	}
+
+	float DamageAmount = CalculateOutputDamage(Weapon);
+	// Здесь можно сделать фильтр по профилу коллизий и наносить урон только врагам, или герою, бочкам и т.д.
+	// Но тогда придётся добавлять сюда кучу имён профилей...
+	// А так решение о получении урона или всяком таком принимается уже в самом повреждаемом акторе, где реализована функция TakeDamage.
+	// Решение принимается на базе класса наносящего урон актора... Это каст... Это дорого...
+	UGameplayStatics::ApplyDamage(DamagedActor, DamageAmount, GetController(), this, Weapon->GetDamageType());
+}
+
 EMovementBehaviour AATCharacterBase::GetMovementBehaviour() const
 {
 	return MovementBehaviour;
+}
+
+ECharacterType AATCharacterBase::GetCharacterType() const
+{
+	return CharacterType;
 }
 
 void AATCharacterBase::SetMovementBehaviour(EMovementBehaviour Behaviour)
@@ -252,6 +297,21 @@ void AATCharacterBase::SetMovementBehaviour(EMovementBehaviour Behaviour)
 //	bIsInCombat = InCombat;
 //	//OnCombatting.Broadcast(bIsInCombat);
 //}
+
+AATWeaponBase* AATCharacterBase::GetMeleeWeapon() const
+{
+	return WeaponComponent->GetMeleeWeapon();
+}
+
+AActor* AATCharacterBase::GetAim() const
+{
+	return Aim;
+}
+
+void AATCharacterBase::SetAim(AActor* NewAim)
+{
+	Aim = NewAim;
+}
 
 // Called every frame
 void AATCharacterBase::Tick(float DeltaTime)

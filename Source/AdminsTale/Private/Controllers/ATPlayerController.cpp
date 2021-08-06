@@ -90,6 +90,14 @@ void AATPlayerController::Dash()
 //	}
 //}
 
+void AATPlayerController::SheatheWeapon()
+{
+	if (IsValid(PlayerCharacter))
+	{
+		PlayerCharacter->GetWeaponComponent()->EquipWeapon(nullptr);
+	}
+}
+
 void AATPlayerController::Action()
 {
 	if (IsValid(PlayerCharacter))
@@ -158,10 +166,11 @@ void AATPlayerController::SetupInputComponent()
 
 	InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Pressed, this, &AATPlayerController::Jump);
 	InputComponent->BindAction(TEXT("Jump"), EInputEvent::IE_Released, this, &AATPlayerController::StopJumping);
-	InputComponent->BindAction(TEXT("MelleeAttack"), EInputEvent::IE_Pressed, this, &AATPlayerController::MeleeAttack);
+	InputComponent->BindAction(TEXT("MeleeAttack"), EInputEvent::IE_Pressed, this, &AATPlayerController::MeleeAttack);
 	InputComponent->BindAction(TEXT("RangeAttackr"), EInputEvent::IE_Pressed, this, &AATPlayerController::RangeAttack);
 	InputComponent->BindAction(TEXT("Dash"), EInputEvent::IE_Pressed, this, &AATPlayerController::Dash);
 	//InputComponent->BindAction(TEXT("Aim"), EInputEvent::IE_Pressed, this, &AATPlayerController::Aim);
+	InputComponent->BindAction(TEXT("SheatheWeapon"), EInputEvent::IE_Pressed, this, &AATPlayerController::SheatheWeapon);
 	InputComponent->BindAction(TEXT("Action"), EInputEvent::IE_Pressed, this, &AATPlayerController::Action);
 
 	InputComponent->BindAction(TEXT("Run"), EInputEvent::IE_Pressed, this, &AATPlayerController::Run);

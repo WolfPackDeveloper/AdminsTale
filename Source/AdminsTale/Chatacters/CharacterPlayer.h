@@ -8,7 +8,7 @@
 
 #include "CharacterPlayer.generated.h"
 
-struct FOnTimelineVector;
+//struct FOnTimelineVector;
 class USpringArmComponent;
 class UCameraComponent;
 //class UCurveVector;

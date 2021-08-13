@@ -6,9 +6,6 @@
 #include "Actors/ATWeaponBase.h"
 #include "ATWeaponMelee.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class ADMINSTALE_API AATWeaponMelee : public AATWeaponBase
 {

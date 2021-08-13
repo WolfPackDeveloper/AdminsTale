@@ -18,8 +18,10 @@ void UATResourceComponent::BeginPlay()
 {
 	Super::BeginPlay();
 
-	CurrentAmount = MaxAmount;
-	
+	check(MaxAmount > 0);
+
+	//CurrentAmount = MaxAmount;
+	Increase(MaxAmount);
 }
 
 void UATResourceComponent::Decrease(float Value)

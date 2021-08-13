@@ -2,6 +2,8 @@
 
 
 #include "ATCharacterPlayer.h"
+#include "ATAimComponent.h"
+#include "ATWeaponComponent.h"
 
 //#include "Animation/AnimInstance.h" // Для проверки AnimInstance - в базовом классе.
 #include "Camera/CameraComponent.h"
@@ -9,6 +11,8 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/Controller.h" // Может, заменить на хэдер PlayerController?
 #include "GameFramework/SpringArmComponent.h"
+//#include "Kismet/KismetSystemLibrary.h"
+//#include "Kismet/KismetMathLibrary.h"
 
 AATCharacterPlayer::AATCharacterPlayer()
 {
@@ -48,16 +52,63 @@ void AATCharacterPlayer::EnableAimRotation(bool EnableAimRotation)
 	}
 }
 
-void AATCharacterPlayer::TakeAim()
-{
-}
+//void AATCharacterPlayer::TakeAim()
+//{
+//	
+//	TArray<TEnumAsByte<EObjectTypeQuery>> AimObjectTypes;
+//	AimObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
+//
+//	// В настройках проекта предварительно создаётся новый тип (будет шестым в массиве, после всяких так WorldStatic и прочей лабуды).
+//	// Первые шесть элементов создаются движком, остальное можно самому придумывать.
+//	//ObjectTypeQuery1 - world static
+//	//ObjectTypeQuery2 - world dynamic
+//	//ObjectTypeQuery3 - pawn
+//	//ObjectTypeQuery4 - physics body
+//	//ObjectTypeQuery5 - vehicle
+//	//ObjectTypeQuery6 - destructible
+//	//ObjectTypeQuery7 - custom 1
+//
+//	TArray<AActor*> ActorsToIgnore;
+//	ActorsToIgnore.Add(this);
+//
+//	TArray<FHitResult> AimHitResults;
+//
+//	const bool Hit = UKismetSystemLibrary::SphereTraceMultiForObjects(
+//		GetWorld(),
+//		GetActorLocation(),
+//		GetActorLocation(),
+//		AimRadius,
+//		AimObjectTypes,
+//		false,
+//		ActorsToIgnore,
+//		EDrawDebugTrace::ForDuration,
+//		AimHitResults,
+//		true,
+//		FLinearColor::Red,
+//		FLinearColor::Green,
+//		2.0f
+//	);
+//		
+//	if (Hit)
+//	{
+//		AimHitResults.Sort(
+//			[this](const FHitResult& A, const FHitResult& B)
+//			{
+//				float fA = UKismetMathLibrary::Abs(UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), A.Actor->GetActorLocation()), GetActorRotation()).Yaw);
+//				float fB = UKismetMathLibrary::Abs(UKismetMathLibrary::NormalizedDeltaRotator(UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), B.Actor->GetActorLocation()), GetActorRotation()).Yaw);
+//				return fA < fB;
+//			}
+//		);
+//
+//		AimedActor = AimHitResults[0].GetActor();
+//	}
+//}
 
 void AATCharacterPlayer::BeginPlay()
 {
 	Super::BeginPlay();
 
 	EnableAimRotation(false);
-
 }
 
 void AATCharacterPlayer::MoveForward(float AxisValue)
@@ -92,6 +143,18 @@ void AATCharacterPlayer::LookUpRate(float AxisValue)
 void AATCharacterPlayer::TurnRightRate(float AxisValue)
 {
 	AddControllerYawInput(AxisValue * BaseTurnRate * GetWorld()->GetDeltaSeconds());
+}
+
+void AATCharacterPlayer::MeleeAttack()
+{
+	AimComponent->TakeAim();
+	WeaponComponent->MeleeAttack();
+}
+
+void AATCharacterPlayer::RangeAttack()
+{
+	AimComponent->TakeAim();
+	WeaponComponent->RangeAttack();
 }
 
 void AATCharacterPlayer::Tick(float DeltaTime)

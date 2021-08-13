@@ -4,15 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/DamageType.h"
-#include "AT_DamageTypeBase.generated.h"
 
-UENUM()
-enum class EDamageType : uint8
-{
-	Physic,
-	Fire,
-	Heal
-};
+#include "ATCoreTypes.h"
+#include "AT_DamageTypeBase.generated.h"
 
 UCLASS()
 class ADMINSTALE_API UAT_DamageTypeBase : public UDamageType

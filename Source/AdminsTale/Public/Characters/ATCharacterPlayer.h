@@ -9,7 +9,6 @@
 class UCameraComponent;
 class USpringArmComponent;
 
-
 UCLASS()
 class ADMINSTALE_API AATCharacterPlayer : public AATCharacterBase
 {
@@ -41,7 +40,7 @@ protected:
 	UCameraComponent* Camera;
 	
 	// Взять в цель ближайшего по ForwardVector`у противника.
-	virtual void TakeAim() override;
+	//virtual void TakeAim() override;
 
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
@@ -49,11 +48,14 @@ protected:
 public:
 
 	// FUNCTIONS
-// Bindings Movement
+	
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
 	void LookUpRate(float AxisValue);
 	void TurnRightRate(float AxisValue);
+
+	virtual void MeleeAttack() override;
+	virtual void RangeAttack() override;
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

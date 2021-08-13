@@ -2,7 +2,7 @@
 
 
 #include "AnimNotifies/ANAttachWeapon.h"
-#include "ATCharacterBase.h"
+#include "Characters/ATCharacterBase.h"
 #include "Components/ATWeaponComponent.h"
 
 #include "Components/SkeletalMeshComponent.h"

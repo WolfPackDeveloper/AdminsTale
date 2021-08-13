@@ -62,7 +62,7 @@ void AATPlayerController::MeleeAttack()
 {
 	if (IsValid(PlayerCharacter))
 	{
-		PlayerCharacter->GetWeaponComponent()->MeleeAttack();
+		PlayerCharacter->MeleeAttack();
 	}
 }
 
@@ -70,7 +70,7 @@ void AATPlayerController::RangeAttack()
 {
 	if (IsValid(PlayerCharacter))
 	{
-		PlayerCharacter->GetWeaponComponent()->RangeAttack();
+		PlayerCharacter->RangeAttack();
 	}
 }
 

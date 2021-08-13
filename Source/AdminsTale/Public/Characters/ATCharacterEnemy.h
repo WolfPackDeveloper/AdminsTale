@@ -6,9 +6,6 @@
 #include "Characters/ATCharacterBase.h"
 #include "ATCharacterEnemy.generated.h"
 
-/**
- * 
- */
 UCLASS()
 class ADMINSTALE_API AATCharacterEnemy : public AATCharacterBase
 {

@@ -4,32 +4,20 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+
+#include "ATCoreTypes.h"
 #include "ATCharacterBase.generated.h"
 
 class AATWeaponBase;
+
+class UATAimComponent;
 class UATResourceComponent;
 class UATWeaponComponent;
-class UAT_DamageTypeBase;
 
+class UAT_DamageTypeBase;
 class UDamageType;
 
-// Дерьмо для определения френдли фаера и буцкания бочек...
-UENUM()
-enum class ECharacterType : uint8
-{
-	Neutral,
-	Player,
-	Enemy,
-	Ally
-};
 
-UENUM()
-enum class EMovementBehaviour : uint8
-{
-	Run,
-	Walk,
-	Crouch
-};
 
 UCLASS()
 class ADMINSTALE_API AATCharacterBase : public ACharacter
@@ -91,6 +79,9 @@ protected:
 	// Components
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UATAimComponent* AimComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UATResourceComponent* HealthComponent = nullptr;
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
@@ -113,16 +104,8 @@ protected:
 	UPROPERTY(EditDefaultsOnly, BlueprintReadOnly, Category = "Animation")
 	float OnDiePlayRate = 1.f;
 
-	// Other
-	UPROPERTY(BlueprintReadWrite)
-	AActor* Aim = nullptr;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
-
-	// Вторая фаза процедуры умирания. Вызывается по AnimNotify в конце "смерти". Включение ragdoll и всякое такое.
-	UFUNCTION()
-	void OnDied();
 
 	// Расчёт входящего урона - Damagetype, Resistance и т.д.
 	virtual float CountReceivedDamage(float DamageAmount, const UAT_DamageTypeBase* DamageType);
@@ -130,16 +113,6 @@ protected:
 	virtual float CountReceivedHealing(float HealAmount);
 	// Расчёт исходящего урона.
 	float CalculateOutputDamage(const AATWeaponBase* Weapon);
-
-	// Aiming handle
-
-	// Взять в цель ближайшего по направлению враждебного персонажа (В общем-то это для Player`а больше)...
-	UFUNCTION(BlueprintCallable)
-	virtual void TakeAim();
-
-	// Доводка к цели перед ударом. Для всех.
-	UFUNCTION(BlueprintCallable)
-	void TurnToAim(); // Наверное, правильнее будет, всё таки, Property.
 
 public:	
 	
@@ -151,6 +124,10 @@ public:
 	virtual void Dash();
 
 	virtual void Action();
+
+	virtual void MeleeAttack();
+
+	virtual void RangeAttack();
 
 	void DealDamage(const FHitResult& HitResult, const AATWeaponBase* Weapon);
 
@@ -167,18 +144,27 @@ public:
 
 	//virtual void SetCombatState(bool InCombat);
 
+	void ClearAim();
+
+	// Вторая фаза процедуры умирания. Вызывается по AnimNotify в конце "смерти". Включение ragdoll и всякое такое.
+	UFUNCTION()
+	void OnDied();
+
+	//UFUNCTION(BlueprintCallable)
+	//UATAimComponent* GetAimComponent() const { return AimComponent; };
+
 	UFUNCTION(BlueprintCallable)
 	UATWeaponComponent* GetWeaponComponent() const { return WeaponComponent; };
+
+	UFUNCTION(BlueprintCallable)
+	UATResourceComponent* GetHealthComponent() const { return HealthComponent; };
+
+	UFUNCTION(BlueprintCallable)
+	UATResourceComponent* GetPowerComponent() const { return PowerComponent; };
 
 	// For AnimNotifyState - AttackTracer
 	UFUNCTION(BlueprintCallable)
 	AATWeaponBase* GetMeleeWeapon() const;
-
-	UFUNCTION(BlueprintCallable)
-	AActor* GetAim() const;
-
-	UFUNCTION(BlueprintCallable)
-	void SetAim(AActor* NewAim);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

@@ -4,22 +4,14 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Actor.h"
+
+#include "ATCoreTypes.h"
 #include "ATWeaponBase.generated.h"
 
 class UBoxComponent;
 class USkeletalMeshComponent;
 
 class UAT_DamageTypeBase;
-
-UENUM()
-enum class EWeaponType : uint8
-{
-	Axe,
-	Hammer,
-	Spear,
-	Staff,
-	Sword
-};
 
 UCLASS()
 class ADMINSTALE_API AATWeaponBase : public AActor

@@ -31,10 +31,10 @@ protected:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
 	float RecoveryTickFrequency = 10.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
-	float CurrentAmount = 0.f;
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Value", meta = (ClampMin = "1.0", ClampMax = "1000.0"))
+	float CurrentAmount = 1.f;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly)
+	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "Value", meta = (ClampMin = "1.0", ClampMax = "1000.0"))
 	float MaxAmount = 100.f;
 	
 	// Called when the game starts

@@ -14,12 +14,13 @@ public class AdminsTale : ModuleRules
 
 		PublicIncludePaths.AddRange(new string[]
 		{
-			"AdminsTale/Public/GameModes",
-			"AdminsTale/Public/Characters",
-			"AdminsTale/Public/Controllers",
-			"AdminsTale/Public/Components",
 			"AdminsTale/Public/Actors",
-			"AdminsTale/Public/Objects"
+			"AdminsTale/Public/Characters",
+			"AdminsTale/Public/Components",
+			"AdminsTale/Public/Controllers",
+			"AdminsTale/Public/GameModes",
+			"AdminsTale/Public/Objects",
+			"AdminsTale/Public/UI"
 		});
 
 		// Пути для поиска файлов проекта. Чтобы не писать полные пути в include.

@@ -3,14 +3,17 @@
 
 #include "ATCharacterBase.h"
 #include "Actors/ATWeaponBase.h"
+#include "Components/ATAimComponent.h"
 #include "Components/ATHealthComponent.h"
 #include "Components/ATPowerComponent.h"
 #include "Components/ATWeaponComponent.h"
 #include "Objects/Damage/AT_DamageTypeBase.h"
 
 #include "Animation/AnimInstance.h"
+#include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
 #include "Kismet/GameplayStatics.h" // ApplyDamage
+//#include "Kismet/KismetMathLibrary.h" // Math, LookAt
 
 DEFINE_LOG_CATEGORY_STATIC(BaseCharacterLog, All, All);
 
@@ -20,6 +23,7 @@ AATCharacterBase::AATCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 
+	AimComponent = CreateDefaultSubobject<UATAimComponent>(TEXT("AimComponent"));
 	HealthComponent = CreateDefaultSubobject<UATHealthComponent>(TEXT("HealthComponent"));
 	PowerComponent = CreateDefaultSubobject<UATPowerComponent>(TEXT("PowerComponent"));
 	WeaponComponent = CreateDefaultSubobject<UATWeaponComponent>(TEXT("WeaponComponent"));
@@ -123,9 +127,6 @@ void AATCharacterBase::OnEndHealth()
 		UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 		if (AnimInstance->IsAnyMontagePlaying())
 		{
-			//UAnimMontage* Montage = AnimInstance->GetCurrentActiveMontage();
-
-			//AnimInstance->Montage_JumpToSectionsEnd(AnimInstance->Montage_GetCurrentSection(Montage), Montage);
 			float BlendTime = 0.2f;
 			AnimInstance->StopAllMontages(BlendTime);
 		}
@@ -158,22 +159,15 @@ void AATCharacterBase::BeginPlay()
 
 void AATCharacterBase::OnDied()
 {
-	//if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
-	//{
-	//	// Чтобы не коноёбило туловище при включении физики. Ну и чтобы пушка отстреливалась.
-	//	if (IsValid(MeleeWeapon))
-	//	{
-	//		// Здесь будет уход в компонент
-	//		MeleeWeapon->GetMesh()->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
-	//		MeleeWeapon->GetMesh()->SetSimulatePhysics(true);
-	//		MeleeWeapon->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//	}
+	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
+	{
+		// А если выключить этот кривой Ragdoll?
+		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+		SetActorTickEnabled(false);
+	}
+	// Дальше можно удалить чара через некоторое время.
 
-	//	// А если выключить этот кривой Ragdoll?
-	//	GetMesh()->SetAllBodiesSimulatePhysics(true);
-	//	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
-	//	SetActorTickEnabled(false);
-	//}
 }
 
 float AATCharacterBase::CountReceivedDamage(float DamageAmount, const UAT_DamageTypeBase* DamageType)
@@ -191,16 +185,6 @@ float AATCharacterBase::CalculateOutputDamage(const AATWeaponBase* Weapon)
 	float DamageMultiplier = 1.f;
 	
 	return Weapon->GetBaseDamage() * DamageMultiplier;
-}
-
-void AATCharacterBase::TakeAim()
-{
-
-}
-
-void AATCharacterBase::TurnToAim()
-{
-
 }
 
 bool AATCharacterBase::IsMakingAction()
@@ -226,6 +210,14 @@ void AATCharacterBase::Dash()
 void AATCharacterBase::Action()
 {
 
+}
+
+void AATCharacterBase::MeleeAttack()
+{
+}
+
+void AATCharacterBase::RangeAttack()
+{
 }
 
 void AATCharacterBase::DealDamage(const FHitResult& HitResult, const AATWeaponBase* Weapon)
@@ -287,6 +279,11 @@ void AATCharacterBase::SetMovementBehaviour(EMovementBehaviour Behaviour)
 	}
 }
 
+void AATCharacterBase::ClearAim()
+{
+	AimComponent->ClearAim();
+}
+
 //bool AATCharacterBase::IsInCombat() const
 //{
 //	return bIsInCombat;
@@ -303,21 +300,10 @@ AATWeaponBase* AATCharacterBase::GetMeleeWeapon() const
 	return WeaponComponent->GetMeleeWeapon();
 }
 
-AActor* AATCharacterBase::GetAim() const
-{
-	return Aim;
-}
-
-void AATCharacterBase::SetAim(AActor* NewAim)
-{
-	Aim = NewAim;
-}
-
 // Called every frame
 void AATCharacterBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
 }
 
 // Called to bind functionality to input

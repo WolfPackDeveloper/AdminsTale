@@ -2,8 +2,9 @@
 
 
 #include "AnimNotifies/ANSAttackTracer.h"
-#include "ATCharacterBase.h"
-#include "ATWeaponBase.h"
+
+#include "Actors/ATWeaponBase.h"
+#include "Characters/ATCharacterBase.h"
 
 #include "Components/SkeletalMeshComponent.h"
 #include "Kismet/KismetSystemLibrary.h"
@@ -63,8 +64,6 @@ void UANSAttackTracer::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenc
 			HitActors.Add(HitActor);
 			// ј урон наносить будет сам персонаж. „тобы потом определить можно было кому что прилетело.
 			Character->DealDamage(HitResult[i], Weapon);
-			
-			//UGameplayStatics::ApplyDamage(HitActor, 10.f, EventInstigator, Player, DamageTypeClass);
 		}
 	}
 
@@ -75,4 +74,5 @@ void UANSAttackTracer::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenc
 void UANSAttackTracer::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	HitActors.Empty();
+	Character->ClearAim();
 }

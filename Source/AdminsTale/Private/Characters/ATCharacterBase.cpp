@@ -81,7 +81,7 @@ void AATCharacterBase::OnTakeDamage(AActor* DamagedActor, float Damage, const UD
 	// Если персонаж не враг народа.
 	if (CharacterType != ECharacterType::Enemy)
 	{
-		// И атака прилетела тоже не от врага народа, то не обращаем на неё внимания. Обознались, вадать.
+		// И атака прилетела тоже не от врага народа, то не обращаем на неё внимания. Обознались, видать.
 		if (AttakersType != ECharacterType::Enemy)
 		{
 			return;
@@ -98,6 +98,11 @@ void AATCharacterBase::OnTakeDamage(AActor* DamagedActor, float Damage, const UD
 	}
 	// Если хочется поиграться с разными воюющими друг с другом непесями, можно и усложнить через switch.
 
+	// Включаем всякое.
+	if (bIsInCombat)
+	{
+		SetCombatState(true);
+	}
 	// CountDamage
 	DefineDamageConsiquences(DamageType, Damage);
 	// PlayMontage OnTakeDamage
@@ -162,7 +167,7 @@ void AATCharacterBase::OnDied()
 	if (IsValid(GetMesh()) && IsValid(GetCapsuleComponent()))
 	{
 		// А если выключить этот кривой Ragdoll?
-		GetMesh()->SetAllBodiesSimulatePhysics(true);
+		//GetMesh()->SetAllBodiesSimulatePhysics(true);
 		GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 		SetActorTickEnabled(false);
 	}
@@ -196,6 +201,12 @@ bool AATCharacterBase::IsMakingAction()
 
 	return false;
 }
+
+void AATCharacterBase::SetCombatState(bool InCombat)
+{
+	bIsInCombat = InCombat;
+}
+
 
 void AATCharacterBase::Jump()
 {
@@ -235,6 +246,11 @@ void AATCharacterBase::DealDamage(const FHitResult& HitResult, const AATWeaponBa
 	// А так решение о получении урона или всяком таком принимается уже в самом повреждаемом акторе, где реализована функция TakeDamage.
 	// Решение принимается на базе класса наносящего урон актора... Это каст... Это дорого...
 	UGameplayStatics::ApplyDamage(DamagedActor, DamageAmount, GetController(), this, Weapon->GetDamageType());
+	
+	if (bIsInCombat)
+	{
+		SetCombatState(true);
+	}
 }
 
 EMovementBehaviour AATCharacterBase::GetMovementBehaviour() const
@@ -284,20 +300,19 @@ void AATCharacterBase::ClearAim()
 	AimComponent->ClearAim();
 }
 
-//bool AATCharacterBase::IsInCombat() const
-//{
-//	return bIsInCombat;
-//}
-//
-//void AATCharacterBase::SetCombatState(bool InCombat)
-//{
-//	bIsInCombat = InCombat;
-//	//OnCombatting.Broadcast(bIsInCombat);
-//}
+bool AATCharacterBase::IsInCombat() const
+{
+	return bIsInCombat;
+}
 
 AATWeaponBase* AATCharacterBase::GetMeleeWeapon() const
 {
 	return WeaponComponent->GetMeleeWeapon();
+}
+
+void AATCharacterBase::SetIsTarget(bool IsTarget)
+{
+
 }
 
 // Called every frame

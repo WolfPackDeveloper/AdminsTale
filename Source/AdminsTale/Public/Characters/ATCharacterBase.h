@@ -56,6 +56,12 @@ protected:
 	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "State")
 	bool bCanReactOnHit = true;
 
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "State")
+	bool bIsTarget = false;
+
+	UPROPERTY(VisibleDefaultsOnly, BlueprintReadWrite, Category = "State")
+	bool bIsInCombat = false;
+
 	UPROPERTY(EditDefaultsOnly, BlueprintReadWrite, Category = "State")
 	EMovementBehaviour MovementBehaviour = EMovementBehaviour::Run;
 	
@@ -114,11 +120,14 @@ protected:
 	// Расчёт исходящего урона.
 	float CalculateOutputDamage(const AATWeaponBase* Weapon);
 
+	virtual void SetCombatState(bool InCombat);
+
 public:	
 	
 	bool IsMakingAction();
 
 	// Action Bindings
+
 	virtual void Jump() override;
 
 	virtual void Dash();
@@ -139,10 +148,8 @@ public:
 
 	virtual void SetMovementBehaviour(EMovementBehaviour Behaviour);
 	
-	//UFUNCTION(BlueprintCallable)
-	//virtual bool IsInCombat() const;
-
-	//virtual void SetCombatState(bool InCombat);
+	UFUNCTION(BlueprintCallable)
+	bool IsInCombat() const;
 
 	void ClearAim();
 
@@ -165,6 +172,8 @@ public:
 	// For AnimNotifyState - AttackTracer
 	UFUNCTION(BlueprintCallable)
 	AATWeaponBase* GetMeleeWeapon() const;
+
+	virtual void SetIsTarget(bool IsTarget);
 
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;

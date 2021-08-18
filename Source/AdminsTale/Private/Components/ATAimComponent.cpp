@@ -29,7 +29,7 @@ void UATAimComponent::BeginPlay()
 
 void UATAimComponent::TakeAim()
 {
-	AimedActor = nullptr;
+	AimedCharacter = nullptr;
 	TArray<TEnumAsByte<EObjectTypeQuery>> AimObjectTypes;
 	AimObjectTypes.Add(EObjectTypeQuery::ObjectTypeQuery7);
 
@@ -68,10 +68,11 @@ void UATAimComponent::TakeAim()
 
 	if (Hit)
 	{
-		AimedActor = AimHitResult.GetActor();
+		// Или убрать каст...		
+		AimedCharacter = Cast<AATCharacterBase>(AimHitResult.GetActor());
 		// Проверка на обоснованность доводки. Если отклонение больше 30 градусов - целься лучше.
 		float CurrentYaw = Character->GetActorRotation().Yaw;
-		float AimYaw = UKismetMathLibrary::FindLookAtRotation(Character->GetActorLocation(), AimedActor->GetActorLocation()).Yaw;
+		float AimYaw = UKismetMathLibrary::FindLookAtRotation(Character->GetActorLocation(), AimedCharacter->GetActorLocation()).Yaw;
 		
 		//Debug
 		//GEngine->AddOnScreenDebugMessage(-1, 5.f, FColor::Green, FString::Printf(TEXT("CurrentYaw: %f"), CurrentYaw));
@@ -94,19 +95,25 @@ void UATAimComponent::TakeAim()
 	}
 }
 
-AActor* UATAimComponent::GetAim() const
+AATCharacterBase* UATAimComponent::GetAim() const
 {
-	return AimedActor;
+	return AimedCharacter;
 }
 
 void UATAimComponent::ClearAim()
-{
-	AimedActor = nullptr;
+{	
+	// Убираем видимость HealthBar`а.
+	if (IsValid(AimedCharacter))
+	{
+		AimedCharacter->SetIsTarget(false);
+	}
+
+	AimedCharacter = nullptr;
 }
 
 void UATAimComponent::TurnToAim(float CurveValue)
 {
-	float Yaw = FMath::Lerp(Character->GetActorRotation().Yaw, UKismetMathLibrary::FindLookAtRotation(Character->GetActorLocation(), AimedActor->GetActorLocation()).Yaw, CurveValue);
+	float Yaw = FMath::Lerp(Character->GetActorRotation().Yaw, UKismetMathLibrary::FindLookAtRotation(Character->GetActorLocation(), AimedCharacter->GetActorLocation()).Yaw, CurveValue);
 
 	FRotator ToAimRotation = FRotator(0.f, Yaw, 0.f);
 
@@ -122,7 +129,7 @@ void UATAimComponent::TickComponent(float DeltaTime, ELevelTick TickType, FActor
 	//GEngine->AddOnScreenDebugMessage(-1, 2.f, FColor::Green, FString::Printf(TEXT("AimComponent tick")));
 
 	// А что если включать тик компонента только на время удара?!
-	if (AimedActor)
+	if (AimedCharacter)
 	{
 		TurnTimeline.TickTimeline(DeltaTime);
 	}

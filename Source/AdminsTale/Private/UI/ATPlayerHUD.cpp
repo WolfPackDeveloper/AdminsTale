@@ -20,7 +20,6 @@ void AATPlayerHUD::BeginPlay()
 	if (IsValid(PlayerHUDWidget))
 	{
 		PlayerHUDWidget->AddToViewport();
-		//PlayerHUDWidget->UpdateValues();
 	}
 }
 

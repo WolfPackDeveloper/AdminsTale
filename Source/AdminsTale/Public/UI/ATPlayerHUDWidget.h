@@ -51,8 +51,5 @@ public:
 	UFUNCTION(BLueprintCallable, Category = "UI")
 	void OnPowerChanged(float CurrentValue, float MaxValue);
 
-	//UFUNCTION()
-	//void UpdateValues();
-
 	virtual void NativeConstruct() override;
 };

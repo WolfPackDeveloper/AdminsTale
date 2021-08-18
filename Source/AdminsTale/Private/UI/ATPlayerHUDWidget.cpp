@@ -35,16 +35,6 @@ void UATPlayerHUDWidget::OnPowerChanged(float CurrentValue, float MaxValue)
 	PowerBar->SetPercent(CountPercent(CurrentValue, MaxValue));
 }
 
-//void UATPlayerHUDWidget::UpdateValues()
-//{
-//	const auto HealthComponent = Player->GetHealthComponent();
-//	const auto PowerComponent = Player->GetPowerComponent();
-//
-//	// Update bars values.
-//	OnHealthChanged(HealthComponent->GetCurrentAmount(), HealthComponent->GetMaxAmount());
-//	OnPowerChanged(PowerComponent->GetCurrentAmount(), PowerComponent->GetMaxAmount());
-//}
-
 void UATPlayerHUDWidget::NativeConstruct()
 {
 	Super::NativeConstruct();

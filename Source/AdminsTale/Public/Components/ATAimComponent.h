@@ -45,7 +45,7 @@ protected:
 	float AimAngle = 60.f;
 
 	UPROPERTY(BlueprintReadWrite)
-	AActor* AimedActor = nullptr;
+	AATCharacterBase* AimedCharacter = nullptr;
 
 	// Called when the game starts
 	virtual void BeginPlay() override;
@@ -57,7 +57,7 @@ public:
 	virtual void TakeAim();
 
 	UFUNCTION(BlueprintCallable)
-	AActor* GetAim() const;
+	AATCharacterBase* GetAim() const;
 
 	UFUNCTION(BlueprintCallable)
 	void ClearAim();

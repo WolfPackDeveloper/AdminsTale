@@ -57,6 +57,9 @@ public:
 	virtual void MeleeAttack() override;
 	virtual void RangeAttack() override;
 
+	// При обнаружении включается боевой режим и вот это вот всё.
+	virtual void SetIsTarget(bool IsTarget);
+
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 

@@ -74,5 +74,5 @@ void UANSAttackTracer::NotifyTick(USkeletalMeshComponent* MeshComp, UAnimSequenc
 void UANSAttackTracer::NotifyEnd(USkeletalMeshComponent* MeshComp, UAnimSequenceBase* Animation)
 {
 	HitActors.Empty();
-	Character->ClearAim();
+	//Character->ClearAim();
 }

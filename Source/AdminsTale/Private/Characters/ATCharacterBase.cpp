@@ -7,6 +7,7 @@
 #include "Components/ATHealthComponent.h"
 #include "Components/ATPowerComponent.h"
 #include "Components/ATWeaponComponent.h"
+#include "Components/ATWidgetComponent.h"
 #include "Objects/Damage/AT_DamageTypeBase.h"
 
 #include "Animation/AnimInstance.h"
@@ -27,6 +28,7 @@ AATCharacterBase::AATCharacterBase()
 	HealthComponent = CreateDefaultSubobject<UATHealthComponent>(TEXT("HealthComponent"));
 	PowerComponent = CreateDefaultSubobject<UATPowerComponent>(TEXT("PowerComponent"));
 	WeaponComponent = CreateDefaultSubobject<UATWeaponComponent>(TEXT("WeaponComponent"));
+	WidgetComponent = CreateDefaultSubobject<UATWidgetComponent>(TEXT("WidgetComponent"));
 
 	// Set CollisionProfile for implementation damage events.
 	FName MeshCollisionProfile = "Character";

@@ -13,6 +13,7 @@ class AATWeaponBase;
 class UATAimComponent;
 class UATResourceComponent;
 class UATWeaponComponent;
+class UATWidgetComponent;
 
 class UAT_DamageTypeBase;
 class UDamageType;
@@ -95,6 +96,9 @@ protected:
 
 	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
 	UATWeaponComponent* WeaponComponent = nullptr;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadWrite, Category = "Components")
+	UATWidgetComponent* WidgetComponent = nullptr;
 
 	// Animation
 

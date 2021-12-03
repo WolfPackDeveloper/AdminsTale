@@ -23,12 +23,6 @@ private:
 
 protected:
 
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	UWidgetComponent* HealthBar = nullptr;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = "Widgets")
-	UWidgetComponent* BattleText = nullptr;
-
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
